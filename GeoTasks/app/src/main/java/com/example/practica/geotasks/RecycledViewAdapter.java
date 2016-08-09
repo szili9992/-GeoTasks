@@ -8,55 +8,59 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by szili on 2016-08-09.
  */
 public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapter.ViewHolder> {
-    private ArrayList<String> dataSet;
+    private List<Task> taskList;
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
         public TextView txtTask;
         public TextView txtDate;
         public ImageView weatherImg;
 
-        public ViewHolder(View view){
+        public ViewHolder(View view) {
             super(view);
-            txtTask=(TextView) view.findViewById(R.id.task);
-            txtDate=(TextView) view.findViewById(R.id.date);
-            weatherImg=(ImageView) view.findViewById(R.id.weather);
+            txtTask = (TextView) view.findViewById(R.id.task);
+            txtDate = (TextView) view.findViewById(R.id.date);
+            weatherImg = (ImageView) view.findViewById(R.id.weather);
         }
     }
-    public void add(int position, String item){
-        dataSet.add(position,item);
+
+    public void add(int position, Task item) {
+        taskList.add(position, item);
         notifyItemInserted(position);
     }
 
-    public void remove(String item){
-        int position=dataSet.indexOf(item);
-        dataSet.remove(position);
+    public void remove(Task item) {
+        int position = taskList.indexOf(item);
+        taskList.remove(position);
         notifyItemRemoved(position);
     }
 
-    public RecycledViewAdapter(ArrayList<String> myDataSet) {
-        this.dataSet = myDataSet;
+    public RecycledViewAdapter(List<Task> taskList) {
+        this.taskList = taskList;
     }
 
     @Override
     public RecycledViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.row_rv,parent,false);
-        ViewHolder viewHolder=new ViewHolder(view);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_rv, parent, false);
+        ViewHolder viewHolder = new ViewHolder(view);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.txtTask.setText(dataSet.get(position));
-        holder.txtDate.setText(dataSet.get(position));
+        Task task = taskList.get(position);
+
+        holder.txtTask.setText(task.getTaskName());
+        holder.txtDate.setText(task.getTime());
     }
 
     @Override
     public int getItemCount() {
-        return dataSet.size();
+        return taskList.size();
     }
 }

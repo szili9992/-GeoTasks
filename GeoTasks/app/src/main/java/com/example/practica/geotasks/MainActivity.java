@@ -21,6 +21,7 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -28,13 +29,14 @@ public class MainActivity extends AppCompatActivity
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private List<Task> taskList=new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ArrayList<String> myDataSet=new ArrayList<>();
-        myDataSet.add(0,"5432423424","dhghfghfg");
+        myDataSet.add(0,"5432423424");
         myDataSet.add(1,"56895764k");
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter (see also next example)
-        adapter = new RecycledViewAdapter(myDataSet);
+        adapter = new RecycledViewAdapter(taskList);
         recyclerView.setAdapter(adapter);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -129,6 +131,10 @@ public class MainActivity extends AppCompatActivity
     public void logOutFb(MenuItem item) {
         LoginManager.getInstance().logOut();
         Intent intent = new Intent(MainActivity.this, LogInActivity.class);
+        startActivity(intent);
+    }
+    public void newTask(View view){
+        Intent intent=new Intent(MainActivity.this,CreateTaskActivity.class);
         startActivity(intent);
     }
 }
