@@ -8,15 +8,19 @@ import android.util.AttributeSet;
 import android.view.View;
 
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 
 public class LogInActivity extends AppCompatActivity {
     private CallbackManager callbackManager;
+    public static Profile profile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +31,27 @@ public class LogInActivity extends AppCompatActivity {
         LoginButton loginButton = (LoginButton) findViewById(R.id.login_button);
         loginButton.setReadPermissions("email");
 
+
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
+                AccessToken accessToken=loginResult.getAccessToken();
+                AccessTokenTracker accessTokenTracker = new AccessTokenTracker(){
+
+                    @Override
+                    protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+
+                    }
+                };
+                accessTokenTracker.startTracking();
+                ProfileTracker profileTracker=new ProfileTracker() {
+                    @Override
+                    protected void onCurrentProfileChanged(Profile oldProfile, Profile currentProfile) {
+
+                    }
+                };
+                profileTracker.startTracking();
+                profile=Profile.getCurrentProfile();
                 Intent intent = new Intent(LogInActivity.this, MainActivity.class);
                 startActivity(intent);
             }

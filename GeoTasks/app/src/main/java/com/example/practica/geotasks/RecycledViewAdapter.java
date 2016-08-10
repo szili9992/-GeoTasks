@@ -1,6 +1,7 @@
 package com.example.practica.geotasks;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import java.util.List;
  * Created by szili on 2016-08-09.
  */
 public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapter.ViewHolder> {
+
     private List<Task> taskList;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -29,6 +31,10 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         }
     }
 
+    public RecycledViewAdapter(List<Task> taskList) {
+        this.taskList = taskList;
+    }
+
     public void add(int position, Task item) {
         taskList.add(position, item);
         notifyItemInserted(position);
@@ -40,15 +46,11 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         notifyItemRemoved(position);
     }
 
-    public RecycledViewAdapter(List<Task> taskList) {
-        this.taskList = taskList;
-    }
 
     @Override
-    public RecycledViewAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_rv, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -57,6 +59,7 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
 
         holder.txtTask.setText(task.getTaskName());
         holder.txtDate.setText(task.getTime());
+        Log.e("TASK AT ADD", "task: "+holder.toString());
     }
 
     @Override

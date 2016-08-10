@@ -11,13 +11,14 @@ public class Task {
     private String latitude;
     private String time;
 
-    public Task(int id, String taskName, String locationName, String longitude, String latitude, String time) {
+    public Task(int id, String taskName,String time, String locationName, String longitude, String latitude ) {
         this.id = id;
+        this.time = time;
         this.taskName = taskName;
         this.locationName = locationName;
         this.longitude = longitude;
         this.latitude = latitude;
-        this.time = time;
+
     }
 
     public Task() {

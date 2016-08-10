@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -17,8 +18,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.facebook.FacebookSdk;
+import com.facebook.Profile;
+import com.facebook.ProfileTracker;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.login.LoginManager;
+import com.facebook.login.widget.ProfilePictureView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,39 +31,35 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private RecyclerView recyclerView;
-    private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private List<Task> taskList=new ArrayList<>();
+    public static RecycledViewAdapter viewAdapter;
+    private ProfilePictureView profilePic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ArrayList<String> myDataSet=new ArrayList<>();
-        myDataSet.add(0,"5432423424");
-        myDataSet.add(1,"56895764k");
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        profilePic=(ProfilePictureView) findViewById(R.id.fbProfilePicture);
+        //profilePic.setProfileId(LogInActivity.profile.getId());
 
-        recyclerView.setHasFixedSize(true);
+        viewAdapter= new RecycledViewAdapter(taskList);
+
 
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
 
         // specify an adapter (see also next example)
-        adapter = new RecycledViewAdapter(taskList);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(viewAdapter);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -137,4 +137,12 @@ public class MainActivity extends AppCompatActivity
         Intent intent=new Intent(MainActivity.this,CreateTaskActivity.class);
         startActivity(intent);
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+    }
+
 }
