@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Request user data from Facebook. Result is a JSON object that is stored in fbJsonData String which is then passed to setUserProfile();
      */
-    protected void getUserInfo() {
+    private void getUserInfo() {
         GraphRequest data_request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
             @Override
             public void onCompleted(JSONObject json_object, GraphResponse response) {

@@ -23,6 +23,8 @@ public class CreateTaskActivity extends AppCompatActivity {
 
         taskName=(EditText)findViewById(R.id.taskName);
         taskDate=(EditText)findViewById(R.id.taskDate);
+        getActionBar().setHomeButtonEnabled(true);
+        getActionBar().setDisplayHomeAsUpEnabled(true);
 
     }
 
