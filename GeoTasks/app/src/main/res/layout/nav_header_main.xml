@@ -15,29 +15,13 @@
 
     <com.mikhaellopez.circularimageview.CircularImageView
         android:id="@+id/fbProfilePicture"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:paddingTop="20dp"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
         android:layout_gravity="center"
+        app:civ_border_color="#000000"
+        app:civ_border_width="2dp"
+        app:civ_shadow="false"
         />
-
-    <!--<ImageView-->
-        <!--android:id="@+id/fbProfilePicture"-->
-        <!--android:layout_width="100dp"-->
-        <!--android:layout_height="100dp"-->
-        <!--android:layout_gravity="center"-->
-        <!--/>-->
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:text="Android Studio"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="android.studio@android.com" />
 
 </LinearLayout>
