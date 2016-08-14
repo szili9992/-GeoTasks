@@ -35,10 +35,27 @@
         app:dsb_min="1"
         app:dsb_max="15"
         />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="Choose location"
+        android:onClick="chooseDestination"
+        android:background="@color/cast_intro_overlay_button_background_color"/>
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Done"
         android:onClick="addTask"/>
+    <TextView
+        android:id="@+id/longitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="longitude"/>
+    <TextView
+        android:id="@+id/latitude"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="latitude"/>
 
 </LinearLayout>
