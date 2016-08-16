@@ -4,32 +4,39 @@ package com.example.practica.geotasks;
  * Created by Practica on 8/9/2016.
  */
 public class Task {
-    private int id;
-    private String taskName;
-    private String locationName;
-    private String longitude;
-    private String latitude;
-    private String time;
-
-    public Task(int id, String taskName,String time, String locationName, String longitude, String latitude ) {
-        this.id = id;
-        this.time = time;
-        this.taskName = taskName;
-        this.locationName = locationName;
-        this.longitude = longitude;
-        this.latitude = latitude;
-
-    }
+    private int _id,geofenceRadius;
+    private String taskName,locationName;
+    private double locationLongitude,locationLatitude;
+    private long intervalStart,intervalEnd;
 
     public Task() {
     }
 
+    public Task(int id, int geofenceRadius, String taskName, String locationName, double locationLongitude, double locationLatitude, long intervalStart, long intervalEnd) {
+        this._id = id;
+        this.geofenceRadius = geofenceRadius;
+        this.taskName = taskName;
+        this.locationName = locationName;
+        this.locationLongitude = locationLongitude;
+        this.locationLatitude = locationLatitude;
+        this.intervalStart = intervalStart;
+        this.intervalEnd = intervalEnd;
+    }
+
     public int getId() {
-        return id;
+        return _id;
     }
 
     public void setId(int id) {
-        this.id = id;
+        this._id = id;
+    }
+
+    public int getGeofenceRadius() {
+        return geofenceRadius;
+    }
+
+    public void setGeofenceRadius(int geofenceRadius) {
+        this.geofenceRadius = geofenceRadius;
     }
 
     public String getTaskName() {
@@ -48,39 +55,35 @@ public class Task {
         this.locationName = locationName;
     }
 
-    public String getLongitude() {
-        return longitude;
+    public double getLocationLongitude() {
+        return locationLongitude;
     }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
+    public void setLocationLongitude(double locationLongitude) {
+        this.locationLongitude = locationLongitude;
     }
 
-    public String getLatitude() {
-        return latitude;
+    public double getLocationLatitude() {
+        return locationLatitude;
     }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
+    public void setLocationLatitude(double locationLatitude) {
+        this.locationLatitude = locationLatitude;
     }
 
-    public String getTime() {
-        return time;
+    public long getIntervalStart() {
+        return intervalStart;
     }
 
-    public void setTime(String time) {
-        this.time = time;
+    public void setIntervalStart(long intervalStart) {
+        this.intervalStart = intervalStart;
     }
 
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", taskName='" + taskName + '\'' +
-                ", locationName='" + locationName + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", time='" + time + '\'' +
-                '}';
+    public long getIntervalEnd() {
+        return intervalEnd;
+    }
+
+    public void setIntervalEnd(long intervalEnd) {
+        this.intervalEnd = intervalEnd;
     }
 }
