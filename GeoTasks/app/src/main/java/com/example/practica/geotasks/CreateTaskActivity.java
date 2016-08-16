@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -22,10 +24,9 @@ public class CreateTaskActivity extends AppCompatActivity {
 
     private PlacePicker.IntentBuilder builder;
     private static final int PLACE_PICKER_FLAG = 1;
-    private EditText taskName,taskDate;
-    private TextView longitude,latitude;
-    private Task task;
-    RecycledViewAdapter adapter;
+    private EditText taskName, taskDate;
+    private TextView longitude, latitude;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,16 +35,17 @@ public class CreateTaskActivity extends AppCompatActivity {
 
         taskName = (EditText) findViewById(R.id.taskName);
         taskDate = (EditText) findViewById(R.id.taskDate);
-        longitude=(TextView)findViewById(R.id.longitude);
-        latitude=(TextView)findViewById(R.id.latitude);
-//        getActionBar().setHomeButtonEnabled(true);
-//        getActionBar().setDisplayHomeAsUpEnabled(true);
+        longitude = (TextView) findViewById(R.id.longitude);
+        latitude = (TextView) findViewById(R.id.latitude);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
     }
 
     public void addTask(View view) {
         Intent intent = new Intent(CreateTaskActivity.this, MainActivity.class);
-        task = new Task();
+        Task task = new Task();
         task.setTaskName(taskName.getText().toString());
         task.setTime(taskDate.getText().toString());
         Log.d("TASK AT ADD", "task: " + task.toString());
@@ -68,15 +70,26 @@ public class CreateTaskActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode==RESULT_OK){
-            switch(requestCode){
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
                 case PLACE_PICKER_FLAG:
-                    Place place=PlacePicker.getPlace(data,this);
+                    Place place = PlacePicker.getPlace(data, this);
                     longitude.setText(String.valueOf(place.getLatLng().longitude));
                     latitude.setText(String.valueOf(place.getLatLng().latitude));
                     break;
             }
         }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

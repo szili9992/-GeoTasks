@@ -32,6 +32,7 @@
         android:paddingBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:dsb_indicatorElevation="0dp"
         app:dsb_min="1"
         app:dsb_max="15"
         />

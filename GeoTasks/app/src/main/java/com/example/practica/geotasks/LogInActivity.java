@@ -32,8 +32,8 @@ public class LogInActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
-
             }
 
             @Override
@@ -49,7 +49,9 @@ public class LogInActivity extends AppCompatActivity {
 
         if (AccessToken.getCurrentAccessToken() != null) {
             Intent intent = new Intent(LogInActivity.this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
+            
         }
 
     }
@@ -57,6 +59,7 @@ public class LogInActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
+
     }
 
 }
