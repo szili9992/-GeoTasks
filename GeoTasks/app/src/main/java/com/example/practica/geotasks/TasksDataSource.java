@@ -95,7 +95,7 @@ public class TasksDataSource {
     }
 
     public void deleteTask(Task task) {
-        long id = task.get_id();
+        int id = task.get_id();
         System.out.println("Comment deleted with id: " + id);
         database.delete(TaskSQLiteHelper.TABLE_TASKS, TaskSQLiteHelper.COLUMN_ID + " = " + id, null);
     }

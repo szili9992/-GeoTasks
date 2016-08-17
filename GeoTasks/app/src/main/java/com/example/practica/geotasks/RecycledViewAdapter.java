@@ -46,6 +46,9 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         notifyItemRemoved(position);
     }
 
+    public Task getItem(int position){
+        return taskList.get(position);
+    }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

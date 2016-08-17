@@ -60,4 +60,21 @@
         android:layout_height="wrap_content"
         android:hint="latitude"/>
 
+    <TextView
+        android:id="@+id/intervalStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="interval start"/>
+    <TextView
+        android:id="@+id/intervalEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="interval end"/>
+    <TextView
+        android:id="@+id/geofenceRadius"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="geofenceradius"/>
+
+
 </LinearLayout>

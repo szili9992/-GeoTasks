@@ -26,27 +26,52 @@ public class CreateTaskActivity extends AppCompatActivity {
     private PlacePicker.IntentBuilder builder;
     private static final int PLACE_PICKER_FLAG = 1;
     private EditText taskName, taskDate;
-    private TextView longitude, latitude,destination;
+    private TextView longitude, latitude, destination, intervalStart, intervalEnd, geofenceRadius;
     private TasksDataSource dataSource;
     private Place place;
+    private int taskId;
+    private Task selectedTask;
+    private boolean update = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_task);
+        Intent editIntent = getIntent();
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         taskName = (EditText) findViewById(R.id.taskName);
         longitude = (TextView) findViewById(R.id.longitude);
         latitude = (TextView) findViewById(R.id.latitude);
-        destination=(TextView) findViewById(R.id.destinationName);
+        destination = (TextView) findViewById(R.id.destinationName);
+        intervalStart = (TextView) findViewById(R.id.intervalStart);
+        intervalEnd = (TextView) findViewById(R.id.intervalEnd);
+        geofenceRadius = (TextView) findViewById(R.id.geofenceRadius);
 
-        dataSource=new TasksDataSource(this);
+        dataSource = new TasksDataSource(this);
         dataSource.open();
 
-        ArrayList<Task> tasks=dataSource.getAllTaks();
+        ArrayList<Task> allTasks = dataSource.getAllTaks();
+
+
+        if (editIntent.getExtras() != null) {
+            taskId = editIntent.getExtras().getInt("id");
+            selectedTask = getTask(taskId, allTasks);
+
+            taskName.setText(selectedTask.getTaskName());
+            longitude.setText(String.valueOf(selectedTask.getDestinationLongitude()));
+            latitude.setText(String.valueOf(selectedTask.getDestinationLatitude()));
+            destination.setText(selectedTask.getDestinationName());
+            intervalStart.setText(String.valueOf(selectedTask.getIntervalStart()));
+            intervalEnd.setText(String.valueOf(selectedTask.getIntervalEnd()));
+            geofenceRadius.setText(String.valueOf(selectedTask.getGeofenceRadius()));
+
+            update = true;
+        }
+
 
     }
 
@@ -60,7 +85,13 @@ public class CreateTaskActivity extends AppCompatActivity {
         task.setIntervalStart(11);
         task.setIntervalEnd(34);
         Log.d("TASK AT ADD", "task: " + task.toString());
-        dataSource.creatTask(task);
+
+        if (update) {
+            task.set_id(selectedTask.get_id());
+            dataSource.editTask(task);
+        } else {
+            dataSource.creatTask(task);
+        }
         startActivity(intent);
     }
 
@@ -103,6 +134,15 @@ public class CreateTaskActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public Task getTask(int taskId, ArrayList<Task> tasks) {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (taskId == tasks.get(i).get_id()) {
+                return tasks.get(i);
+            }
+        }
+        return null;
     }
 
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +22,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -44,16 +47,18 @@ public class MainActivity extends AppCompatActivity
     private CircularImageView facebookProfilePicture;
     private String fbJsonData;
     private TasksDataSource dataSource;
-
+    private MaterialDialog.Builder builder;
+    private ArrayList<Task> tasks;
+    private int taskId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         dataSource = new TasksDataSource(this);
         dataSource.open();
-        ArrayList<Task> tasks = dataSource.getAllTaks();
+        tasks = dataSource.getAllTaks();
 
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -74,19 +79,6 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new RecyclerTouchListener.ClickListener() {
-            @Override
-            public void onClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "onclick position: " + position, Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-                Toast.makeText(MainActivity.this, "onLongclick position: " + position, Toast.LENGTH_SHORT).show();
-            }
-        }));
-
 
         viewAdapter = new RecycledViewAdapter(tasks);
 
@@ -98,6 +90,26 @@ public class MainActivity extends AppCompatActivity
 
         // specify an adapter (see also next example)
         recyclerView.setAdapter(viewAdapter);
+
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Intent intent = new Intent(MainActivity.this, CreateTaskActivity.class);
+                Task task = viewAdapter.getItem(position);
+                intent.putExtra("id",task.get_id());
+                startActivity(intent);
+
+                //Toast.makeText(MainActivity.this, "task" + task.toString(), Toast.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onLongClick(View view, final int position) {
+                Task task = viewAdapter.getItem(position);
+                taskId=task.get_id();
+                alertDialogShow(taskId);
+                Toast.makeText(MainActivity.this, "onLongclick position: " + position, Toast.LENGTH_SHORT).show();
+            }
+        }));
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -222,7 +234,38 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void editTask(View view) {
+    public void alertDialogShow(final int position){
+
+        builder = new MaterialDialog.Builder(MainActivity.this)
+                .content(R.string.alert_dialog_content)
+                .positiveText(R.string.alert_dialog_positive)
+                .negativeText(R.string.alert_dialog_negative)
+                .onPositive(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        viewAdapter.remove(getTask(position,tasks));
+                        dataSource.deleteTask(getTask(position,tasks));
+
+                    }
+                })
+                .onNegative(new MaterialDialog.SingleButtonCallback() {
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+                });
+        MaterialDialog dialog = builder.build();
+        dialog.show();
+    }
+
+
+    public Task getTask(int taskId, ArrayList<Task> tasks) {
+        for (int i = 0; i < tasks.size(); i++) {
+            if (taskId == tasks.get(i).get_id()) {
+                return tasks.get(i);
+            }
+        }
+        return null;
     }
 
 
