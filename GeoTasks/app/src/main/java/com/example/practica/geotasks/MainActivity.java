@@ -1,5 +1,6 @@
 package com.example.practica.geotasks;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -17,6 +19,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -24,7 +28,9 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
+
 import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,19 +39,21 @@ public class MainActivity extends AppCompatActivity
 
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private List<Task> taskList = new ArrayList<>();
     public static RecycledViewAdapter viewAdapter;
     private JSONObject response, profile_pic_data, profile_pic_url;
     private CircularImageView facebookProfilePicture;
     private String fbJsonData;
+    private TasksDataSource dataSource;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-
+        dataSource = new TasksDataSource(this);
+        dataSource.open();
+        ArrayList<Task> tasks = dataSource.getAllTaks();
 
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -67,9 +75,20 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new RecyclerTouchListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                Toast.makeText(MainActivity.this, "onclick position: " + position, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+                Toast.makeText(MainActivity.this, "onLongclick position: " + position, Toast.LENGTH_SHORT).show();
+            }
+        }));
 
 
-        viewAdapter = new RecycledViewAdapter(taskList);
+        viewAdapter = new RecycledViewAdapter(tasks);
 
 
         // use a linear layout manager
@@ -186,6 +205,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Display current user data using the JSON object from getUserInfo()
+     *
      * @param jsonData
      */
     public void setUserProfile(String jsonData) {
@@ -199,6 +219,10 @@ public class MainActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+
+    public void editTask(View view) {
     }
 
 

@@ -19,27 +19,34 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class CreateTaskActivity extends AppCompatActivity {
 
     private PlacePicker.IntentBuilder builder;
     private static final int PLACE_PICKER_FLAG = 1;
     private EditText taskName, taskDate;
-    private TextView longitude, latitude;
+    private TextView longitude, latitude,destination;
+    private TasksDataSource dataSource;
+    private Place place;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_task);
-
-        taskName = (EditText) findViewById(R.id.taskName);
-        taskDate = (EditText) findViewById(R.id.taskDate);
-        longitude = (TextView) findViewById(R.id.longitude);
-        latitude = (TextView) findViewById(R.id.latitude);
-
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        taskName = (EditText) findViewById(R.id.taskName);
+        longitude = (TextView) findViewById(R.id.longitude);
+        latitude = (TextView) findViewById(R.id.latitude);
+        destination=(TextView) findViewById(R.id.destinationName);
+
+        dataSource=new TasksDataSource(this);
+        dataSource.open();
+
+        ArrayList<Task> tasks=dataSource.getAllTaks();
 
     }
 
@@ -47,8 +54,13 @@ public class CreateTaskActivity extends AppCompatActivity {
         Intent intent = new Intent(CreateTaskActivity.this, MainActivity.class);
         Task task = new Task();
         task.setTaskName(taskName.getText().toString());
-        task.setTime(taskDate.getText().toString());
+        task.setDestinationName(place.getName().toString());
+        task.setDestinationLongitude(place.getLatLng().longitude);
+        task.setDestinationLatitude(place.getLatLng().latitude);
+        task.setIntervalStart(11);
+        task.setIntervalEnd(34);
         Log.d("TASK AT ADD", "task: " + task.toString());
+        dataSource.creatTask(task);
         startActivity(intent);
     }
 
@@ -73,13 +85,13 @@ public class CreateTaskActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PLACE_PICKER_FLAG:
-                    Place place = PlacePicker.getPlace(data, this);
+                    place = PlacePicker.getPlace(data, this);
                     longitude.setText(String.valueOf(place.getLatLng().longitude));
                     latitude.setText(String.valueOf(place.getLatLng().latitude));
+                    destination.setText(place.getName());
                     break;
             }
         }
-
     }
 
     @Override
@@ -92,4 +104,6 @@ public class CreateTaskActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }

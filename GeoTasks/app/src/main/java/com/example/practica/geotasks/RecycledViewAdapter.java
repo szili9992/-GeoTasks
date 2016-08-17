@@ -19,15 +19,15 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
     private List<Task> taskList;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView txtTask;
-        public TextView txtDate;
+        public TextView taskName;
+        public TextView destination;
         public ImageView weatherImg;
 
         public ViewHolder(View view) {
             super(view);
-            txtTask = (TextView) view.findViewById(R.id.task);
-            txtDate = (TextView) view.findViewById(R.id.date);
-            weatherImg = (ImageView) view.findViewById(R.id.weather);
+            taskName = (TextView) view.findViewById(R.id.task);
+            destination = (TextView) view.findViewById(R.id.date);
+            //weatherImg = (ImageView) view.findViewById(R.id.weather);
         }
     }
 
@@ -57,8 +57,9 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
     public void onBindViewHolder(ViewHolder holder, int position) {
         Task task = taskList.get(position);
 
-        holder.txtTask.setText(task.getTaskName());
-        holder.txtDate.setText(task.getTime());
+        holder.taskName.setText(task.getTaskName());
+        holder.destination.setText(task.getDestinationName());
+
         Log.e("TASK AT ADD", "task: "+holder.toString());
     }
 

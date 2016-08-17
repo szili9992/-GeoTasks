@@ -4,39 +4,32 @@ package com.example.practica.geotasks;
  * Created by Practica on 8/9/2016.
  */
 public class Task {
-    private int _id,geofenceRadius;
-    private String taskName,locationName;
-    private double locationLongitude,locationLatitude;
-    private long intervalStart,intervalEnd;
+    private int _id;
+    private String taskName, destinationName;
+    private double destinationLongitude, destinationLatitude;
+    private long intervalStart, intervalEnd;
+    private int geofenceRadius;
 
     public Task() {
     }
 
-    public Task(int id, int geofenceRadius, String taskName, String locationName, double locationLongitude, double locationLatitude, long intervalStart, long intervalEnd) {
-        this._id = id;
-        this.geofenceRadius = geofenceRadius;
+    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius) {
+        this._id = _id;
         this.taskName = taskName;
-        this.locationName = locationName;
-        this.locationLongitude = locationLongitude;
-        this.locationLatitude = locationLatitude;
+        this.destinationName = destinationName;
+        this.destinationLongitude = destinationLongitude;
+        this.destinationLatitude = destinationLatitude;
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
+        this.geofenceRadius = geofenceRadius;
     }
 
-    public int getId() {
+    public int get_id() {
         return _id;
     }
 
-    public void setId(int id) {
-        this._id = id;
-    }
-
-    public int getGeofenceRadius() {
-        return geofenceRadius;
-    }
-
-    public void setGeofenceRadius(int geofenceRadius) {
-        this.geofenceRadius = geofenceRadius;
+    public void set_id(int _id) {
+        this._id = _id;
     }
 
     public String getTaskName() {
@@ -47,28 +40,28 @@ public class Task {
         this.taskName = taskName;
     }
 
-    public String getLocationName() {
-        return locationName;
+    public String getDestinationName() {
+        return destinationName;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setDestinationName(String destinationName) {
+        this.destinationName = destinationName;
     }
 
-    public double getLocationLongitude() {
-        return locationLongitude;
+    public double getDestinationLongitude() {
+        return destinationLongitude;
     }
 
-    public void setLocationLongitude(double locationLongitude) {
-        this.locationLongitude = locationLongitude;
+    public void setDestinationLongitude(double destinationLongitude) {
+        this.destinationLongitude = destinationLongitude;
     }
 
-    public double getLocationLatitude() {
-        return locationLatitude;
+    public double getDestinationLatitude() {
+        return destinationLatitude;
     }
 
-    public void setLocationLatitude(double locationLatitude) {
-        this.locationLatitude = locationLatitude;
+    public void setDestinationLatitude(double destinationLatitude) {
+        this.destinationLatitude = destinationLatitude;
     }
 
     public long getIntervalStart() {
@@ -85,5 +78,27 @@ public class Task {
 
     public void setIntervalEnd(long intervalEnd) {
         this.intervalEnd = intervalEnd;
+    }
+
+    public int getGeofenceRadius() {
+        return geofenceRadius;
+    }
+
+    public void setGeofenceRadius(int geofenceRadius) {
+        this.geofenceRadius = geofenceRadius;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "_id=" + _id +
+                ", taskName='" + taskName + '\'' +
+                ", destinationName='" + destinationName + '\'' +
+                ", destinationLongitude=" + destinationLongitude +
+                ", destinationLatitude=" + destinationLatitude +
+                ", intervalStart=" + intervalStart +
+                ", intervalEnd=" + intervalEnd +
+                ", geofenceRadius=" + geofenceRadius +
+                '}';
     }
 }

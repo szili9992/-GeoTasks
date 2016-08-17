@@ -20,13 +20,9 @@
         android:hint="Task name"
         android:singleLine="true" />
 
-    <EditText
-        android:id="@+id/taskDate"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:hint="Datetime"
-        android:inputType="datetime"
-        android:singleLine="true" />
+
+
+
     <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
@@ -36,6 +32,11 @@
         app:dsb_min="1"
         app:dsb_max="15"
         />
+    <TextView
+        android:id="@+id/destinationName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="destination"/>
 
     <Button
         android:layout_width="match_parent"
