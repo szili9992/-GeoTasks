@@ -1,35 +1,31 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.activities;
 
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.FacebookSdk;
+import com.example.practica.geotasks.R;
+import com.example.practica.geotasks.models.Task;
+import com.example.practica.geotasks.data.TasksDataSource;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-
-import java.io.Serializable;
 import java.util.ArrayList;
 
 public class CreateTaskActivity extends AppCompatActivity {
 
-    private PlacePicker.IntentBuilder builder;
     private static final int PLACE_PICKER_FLAG = 1;
     private EditText taskName, taskDate;
     private TextView longitude, latitude, destination, intervalStart, intervalEnd, geofenceRadius;
-    private TasksDataSource dataSource;
+    private TasksDataSource taskDataSource;
     private Place place;
-    private int taskId;
     private Task selectedTask;
     private boolean update = false;
 
@@ -51,14 +47,14 @@ public class CreateTaskActivity extends AppCompatActivity {
         intervalEnd = (TextView) findViewById(R.id.intervalEnd);
         geofenceRadius = (TextView) findViewById(R.id.geofenceRadius);
 
-        dataSource = new TasksDataSource(this);
-        dataSource.open();
+        taskDataSource = new TasksDataSource(this);
+        taskDataSource.open();
 
-        ArrayList<Task> allTasks = dataSource.getAllTaks();
+        ArrayList<Task> allTasks = taskDataSource.getAllTasks();
 
 
         if (editIntent.getExtras() != null) {
-            taskId = editIntent.getExtras().getInt("id");
+            int taskId = editIntent.getExtras().getInt("id");
             selectedTask = getTask(taskId, allTasks);
 
             taskName.setText(selectedTask.getTaskName());
@@ -75,8 +71,12 @@ public class CreateTaskActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Add/edit task in the recyclerView depending on the value of the update boolean variable.
+     * @param view
+     */
     public void addTask(View view) {
-        Intent intent = new Intent(CreateTaskActivity.this, MainActivity.class);
+        Intent addTaskIntent = new Intent(CreateTaskActivity.this, MainActivity.class);
         Task task = new Task();
         task.setTaskName(taskName.getText().toString());
         task.setDestinationName(place.getName().toString());
@@ -84,19 +84,23 @@ public class CreateTaskActivity extends AppCompatActivity {
         task.setDestinationLatitude(place.getLatLng().latitude);
         task.setIntervalStart(11);
         task.setIntervalEnd(34);
-        Log.d("TASK AT ADD", "task: " + task.toString());
+
 
         if (update) {
             task.set_id(selectedTask.get_id());
-            dataSource.editTask(task);
+            taskDataSource.editTask(task);
         } else {
-            dataSource.creatTask(task);
+            taskDataSource.creatTask(task);
         }
-        startActivity(intent);
+        startActivity(addTaskIntent);
     }
 
+    /**
+     * Chose destination with Google Places API Place picket
+     * @param view
+     */
     public void chooseDestination(View view) {
-        builder = new PlacePicker.IntentBuilder();
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
         try {
             Intent intent = builder.build(CreateTaskActivity.this);
             startActivityForResult(intent, PLACE_PICKER_FLAG);
@@ -116,7 +120,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PLACE_PICKER_FLAG:
-                    place = PlacePicker.getPlace(data, this);
+                    place = PlacePicker.getPlace(this,data);
                     longitude.setText(String.valueOf(place.getLatLng().longitude));
                     latitude.setText(String.valueOf(place.getLatLng().latitude));
                     destination.setText(place.getName());
@@ -125,6 +129,11 @@ public class CreateTaskActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Back button to main activity.
+     * @param item
+     * @return
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -136,6 +145,12 @@ public class CreateTaskActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Compare if the task id from recycled view matches the one stored in the arrayList. If it matches then it returns that specific task.
+     * @param taskId
+     * @param tasks
+     * @return
+     */
     public Task getTask(int taskId, ArrayList<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             if (taskId == tasks.get(i).get_id()) {

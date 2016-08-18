@@ -1,4 +1,4 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.models;
 
 /**
  * Created by Practica on 8/9/2016.

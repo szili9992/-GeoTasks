@@ -1,4 +1,4 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -8,13 +8,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.example.practica.geotasks.R;
+import com.example.practica.geotasks.models.Task;
+
 import java.util.List;
 
 /**
  * Created by szili on 2016-08-09.
  */
-public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapter.ViewHolder> {
+public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
     private List<Task> taskList;
 
@@ -31,7 +33,7 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         }
     }
 
-    public RecycledViewAdapter(List<Task> taskList) {
+    public TaskAdapter(List<Task> taskList) {
         this.taskList = taskList;
     }
 
@@ -46,7 +48,7 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         notifyItemRemoved(position);
     }
 
-    public Task getItem(int position){
+    public Task getTask(int position){
         return taskList.get(position);
     }
 
@@ -63,7 +65,6 @@ public class RecycledViewAdapter extends RecyclerView.Adapter<RecycledViewAdapte
         holder.taskName.setText(task.getTaskName());
         holder.destination.setText(task.getDestinationName());
 
-        Log.e("TASK AT ADD", "task: "+holder.toString());
     }
 
     @Override

@@ -1,16 +1,12 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -20,12 +16,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.example.practica.geotasks.R;
+import com.example.practica.geotasks.utilities.RecyclerTouchListener;
+import com.example.practica.geotasks.models.Task;
+import com.example.practica.geotasks.data.TasksDataSource;
+import com.example.practica.geotasks.adapters.TaskAdapter;
 import com.facebook.AccessToken;
-import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
@@ -35,39 +34,33 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private RecyclerView recyclerView;
-    private RecyclerView.LayoutManager layoutManager;
-    public static RecycledViewAdapter viewAdapter;
-    private JSONObject response, profile_pic_data, profile_pic_url;
+    private TaskAdapter taskAdapter;
     private CircularImageView facebookProfilePicture;
     private String fbJsonData;
-    private TasksDataSource dataSource;
-    private MaterialDialog.Builder builder;
-    private ArrayList<Task> tasks;
+    private TasksDataSource taskDataSource;
+    private ArrayList<Task> taskList;
     private int taskId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
-        dataSource = new TasksDataSource(this);
-        dataSource.open();
-        tasks = dataSource.getAllTaks();
-
-
+        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View hView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         facebookProfilePicture = (CircularImageView) hView.findViewById(R.id.fbProfilePicture);
 
 
-        getUserInfo();
+        taskDataSource = new TasksDataSource(this);
+        taskDataSource.open();
+        taskList = taskDataSource.getAllTasks();
 
+
+        getUserInfo();
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -80,39 +73,27 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        viewAdapter = new RecycledViewAdapter(tasks);
-
-
-        // use a linear layout manager
-        layoutManager = new LinearLayoutManager(this);
+        taskAdapter = new TaskAdapter(taskList);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
-
-        // specify an adapter (see also next example)
-        recyclerView.setAdapter(viewAdapter);
-
+        recyclerView.setAdapter(taskAdapter);
         recyclerView.addOnItemTouchListener(new RecyclerTouchListener(this, recyclerView, new RecyclerTouchListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
                 Intent intent = new Intent(MainActivity.this, CreateTaskActivity.class);
-                Task task = viewAdapter.getItem(position);
+                Task task = taskAdapter.getTask(position);
                 intent.putExtra("id",task.get_id());
                 startActivity(intent);
-
-                //Toast.makeText(MainActivity.this, "task" + task.toString(), Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onLongClick(View view, final int position) {
-                Task task = viewAdapter.getItem(position);
+                Task task = taskAdapter.getTask(position);
                 taskId=task.get_id();
                 alertDialogShow(taskId);
-                Toast.makeText(MainActivity.this, "onLongclick position: " + position, Toast.LENGTH_SHORT).show();
             }
         }));
-
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -125,15 +106,15 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
     }
 
-//    @Override
-//    public void onBackPressed() {
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        if (drawer.isDrawerOpen(GravityCompat.START)) {
-//            drawer.closeDrawer(GravityCompat.START);
-//        } else {
-//            super.onBackPressed();
-//        }
-//    }
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -222,11 +203,11 @@ public class MainActivity extends AppCompatActivity
      */
     public void setUserProfile(String jsonData) {
         try {
-            response = new JSONObject(jsonData);
+            JSONObject response = new JSONObject(jsonData);
             //user_email.setText(response.get("email").toString());
             //user_name.setText(response.get("name").toString());
-            profile_pic_data = new JSONObject(response.get("picture").toString());
-            profile_pic_url = new JSONObject(profile_pic_data.getString("data"));
+            JSONObject profile_pic_data = new JSONObject(response.get("picture").toString());
+            JSONObject profile_pic_url = new JSONObject(profile_pic_data.getString("data"));
             Picasso.with(this).load(profile_pic_url.getString("url")).into(facebookProfilePicture);
         } catch (Exception e) {
             e.printStackTrace();
@@ -236,22 +217,22 @@ public class MainActivity extends AppCompatActivity
 
     public void alertDialogShow(final int position){
 
-        builder = new MaterialDialog.Builder(MainActivity.this)
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(MainActivity.this)
                 .content(R.string.alert_dialog_content)
                 .positiveText(R.string.alert_dialog_positive)
                 .negativeText(R.string.alert_dialog_negative)
                 .onPositive(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        viewAdapter.remove(getTask(position,tasks));
-                        dataSource.deleteTask(getTask(position,tasks));
-
+                        Task task = getSelectedTask(position, taskList);
+                        taskAdapter.remove(task);
+                        taskDataSource.deleteTask(task);
                     }
                 })
                 .onNegative(new MaterialDialog.SingleButtonCallback() {
                     @Override
                     public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                        dialog.dismiss();
+
                     }
                 });
         MaterialDialog dialog = builder.build();
@@ -259,7 +240,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public Task getTask(int taskId, ArrayList<Task> tasks) {
+    public Task getSelectedTask(int taskId, ArrayList<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             if (taskId == tasks.get(i).get_id()) {
                 return tasks.get(i);

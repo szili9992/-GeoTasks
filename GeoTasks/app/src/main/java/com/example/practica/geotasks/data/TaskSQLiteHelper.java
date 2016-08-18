@@ -1,4 +1,4 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

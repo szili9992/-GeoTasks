@@ -1,4 +1,4 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,8 +6,9 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.practica.geotasks.models.Task;
+
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by szili on 2016-08-16.
@@ -61,7 +62,7 @@ public class TasksDataSource {
      *
      * @return
      */
-    public ArrayList<Task> getAllTaks() {
+    public ArrayList<Task> getAllTasks() {
 
         ArrayList<Task> tasks = new ArrayList<>();
         Cursor cursor = database.query(TaskSQLiteHelper.TABLE_TASKS, allColumns, null, null, null, null, null);
