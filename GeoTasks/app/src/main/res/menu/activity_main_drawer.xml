@@ -5,7 +5,8 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
-            android:title="Import" />
+            android:title="weather"
+            android:onClick="placeholder"/>
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
@@ -25,7 +26,8 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="Share" />
+                android:title="weather"
+                />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/ic_menu_send"

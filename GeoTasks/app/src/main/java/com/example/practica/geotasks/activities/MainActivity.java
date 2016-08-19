@@ -250,4 +250,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
+    public void placeholder(MenuItem item) {
+        Intent intent=new Intent(MainActivity.this,PlaceholderActivity.class);
+        startActivity(intent);
+    }
 }
