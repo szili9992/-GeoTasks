@@ -21,14 +21,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
     private List<Task> taskList;
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView taskName;
-        public TextView destination;
+        public TextView taskName,destination,currentWeather;
+
         public ImageView weatherImg;
 
         public ViewHolder(View view) {
             super(view);
             taskName = (TextView) view.findViewById(R.id.task);
             destination = (TextView) view.findViewById(R.id.date);
+            currentWeather=(TextView)view.findViewById(R.id.weather);
             //weatherImg = (ImageView) view.findViewById(R.id.weather);
         }
     }
@@ -64,6 +65,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
         holder.taskName.setText(task.getTaskName());
         holder.destination.setText(task.getDestinationName());
+        holder.currentWeather.setText(String.valueOf(task.getWeatherInfo().getMain().getTemp()));
 
     }
 

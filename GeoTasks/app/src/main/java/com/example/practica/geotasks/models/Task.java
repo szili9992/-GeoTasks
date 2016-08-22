@@ -1,5 +1,7 @@
 package com.example.practica.geotasks.models;
 
+import com.example.practica.geotasks.weather.WeatherInfo;
+
 /**
  * Created by Practica on 8/9/2016.
  */
@@ -9,11 +11,12 @@ public class Task {
     private double destinationLongitude, destinationLatitude;
     private long intervalStart, intervalEnd;
     private int geofenceRadius;
+    private WeatherInfo weatherInfo;
 
     public Task() {
     }
 
-    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius) {
+    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius, WeatherInfo info) {
         this._id = _id;
         this.taskName = taskName;
         this.destinationName = destinationName;
@@ -22,6 +25,7 @@ public class Task {
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
         this.geofenceRadius = geofenceRadius;
+        this.weatherInfo=info;
     }
 
     public int get_id() {
@@ -88,6 +92,14 @@ public class Task {
         this.geofenceRadius = geofenceRadius;
     }
 
+    public WeatherInfo getWeatherInfo() {
+        return weatherInfo;
+    }
+
+    public void setWeatherInfo(WeatherInfo weatherInfo) {
+        this.weatherInfo = weatherInfo;
+    }
+
     @Override
     public String toString() {
         return "Task{" +
@@ -99,6 +111,7 @@ public class Task {
                 ", intervalStart=" + intervalStart +
                 ", intervalEnd=" + intervalEnd +
                 ", geofenceRadius=" + geofenceRadius +
+                ", weatherInfo=" + weatherInfo +
                 '}';
     }
 }
