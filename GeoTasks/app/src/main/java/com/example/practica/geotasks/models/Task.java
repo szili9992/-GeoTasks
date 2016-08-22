@@ -13,10 +13,11 @@ public class Task {
     private int geofenceRadius;
     private WeatherInfo weatherInfo;
 
+
     public Task() {
     }
 
-    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius, WeatherInfo info) {
+    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius, double weather) {
         this._id = _id;
         this.taskName = taskName;
         this.destinationName = destinationName;
@@ -25,8 +26,14 @@ public class Task {
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
         this.geofenceRadius = geofenceRadius;
-        this.weatherInfo=info;
+        this.weatherInfo=new WeatherInfo();
+        weatherInfo.getMain().setTemp(weather);
+
+
+
     }
+
+
 
     public int get_id() {
         return _id;

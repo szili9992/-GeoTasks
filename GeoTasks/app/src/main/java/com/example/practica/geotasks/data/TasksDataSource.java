@@ -20,7 +20,7 @@ public class TasksDataSource {
     private String[] allColumns = {TaskSQLiteHelper.COLUMN_ID, TaskSQLiteHelper.COLUMN_TASK_NAME,
             TaskSQLiteHelper.COLUMN_DESTINATION_NAME, TaskSQLiteHelper.COLUMN_DESTINATION_LONGITUDE,
             TaskSQLiteHelper.COLUMN_DESTINATION_LATITUDE, TaskSQLiteHelper.COLUMN_INTERVAL_START,
-            TaskSQLiteHelper.COLUMN_INTERVAL_END, TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS};
+            TaskSQLiteHelper.COLUMN_INTERVAL_END, TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS,TaskSQLiteHelper.COLUMN_WEATHER};
 
     public TasksDataSource(Context context) {
         dbHelper = new TaskSQLiteHelper(context);
@@ -44,6 +44,7 @@ public class TasksDataSource {
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_START, task.getIntervalStart());
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_END, task.getIntervalEnd());
         values.put(TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS, task.getGeofenceRadius());
+        values.put(TaskSQLiteHelper.COLUMN_WEATHER,task.getWeatherInfo().getMain().getTemp());
         long insertId = database.insert(TaskSQLiteHelper.TABLE_TASKS, null, values);
         Cursor cursor = database.query(TaskSQLiteHelper.TABLE_TASKS, allColumns, TaskSQLiteHelper.COLUMN_ID + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
@@ -53,7 +54,7 @@ public class TasksDataSource {
     }
 
     private Task cursorToTask(Cursor cursor) {
-        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getLong(5), cursor.getLong(6), cursor.getInt(7));
+        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getLong(5), cursor.getLong(6), cursor.getInt(7),cursor.getDouble(8));
         return task;
     }
 
@@ -91,6 +92,7 @@ public class TasksDataSource {
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_START, task.getIntervalStart());
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_END, task.getIntervalEnd());
         values.put(TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS, task.getGeofenceRadius());
+        values.put(TaskSQLiteHelper.COLUMN_WEATHER,task.getWeatherInfo().getMain().getTemp());
 
         database.update(TaskSQLiteHelper.TABLE_TASKS, values, "_id = " + task.get_id(), null);
     }

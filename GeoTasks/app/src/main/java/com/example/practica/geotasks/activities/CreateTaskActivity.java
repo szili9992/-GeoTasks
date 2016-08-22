@@ -3,6 +3,7 @@ package com.example.practica.geotasks.activities;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
@@ -12,12 +13,20 @@ import android.widget.Toast;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.models.Task;
 import com.example.practica.geotasks.data.TasksDataSource;
+import com.example.practica.geotasks.weather.WeatherInfo;
+import com.example.practica.geotasks.weather.WeatherInfoService;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+
+import java.io.IOException;
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class CreateTaskActivity extends AppCompatActivity {
 
@@ -28,6 +37,9 @@ public class CreateTaskActivity extends AppCompatActivity {
     private Place place;
     private Task selectedTask;
     private boolean update = false;
+    private WeatherInfoService service;
+    private WeatherInfo weatherInfo;
+    private double weatherCelsius;
 
 
     @Override
@@ -69,10 +81,14 @@ public class CreateTaskActivity extends AppCompatActivity {
         }
 
 
+        service = new WeatherInfoService();
+
+
     }
 
     /**
      * Add/edit task in the recyclerView depending on the value of the update boolean variable.
+     *
      * @param view
      */
     public void addTask(View view) {
@@ -84,6 +100,14 @@ public class CreateTaskActivity extends AppCompatActivity {
         task.setDestinationLatitude(place.getLatLng().latitude);
         task.setIntervalStart(11);
         task.setIntervalEnd(34);
+
+        getWeatherForCoords(place.getLatLng().longitude, place.getLatLng().latitude, "8617b30a6fc114ad2ad929c111b76edf", "metric");
+        Log.e("weatherinfo :", weatherInfo.toString());
+        try {
+            task.setWeatherInfo(weatherInfo);
+        }catch (Exception e){
+            Log.e("weatherinfo :", weatherInfo.toString());
+        }
 
 
         if (update) {
@@ -97,6 +121,7 @@ public class CreateTaskActivity extends AppCompatActivity {
 
     /**
      * Chose destination with Google Places API Place picket
+     *
      * @param view
      */
     public void chooseDestination(View view) {
@@ -120,7 +145,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case PLACE_PICKER_FLAG:
-                    place = PlacePicker.getPlace(this,data);
+                    place = PlacePicker.getPlace(this, data);
                     longitude.setText(String.valueOf(place.getLatLng().longitude));
                     latitude.setText(String.valueOf(place.getLatLng().latitude));
                     destination.setText(place.getName());
@@ -131,6 +156,7 @@ public class CreateTaskActivity extends AppCompatActivity {
 
     /**
      * Back button to main activity.
+     *
      * @param item
      * @return
      */
@@ -147,6 +173,7 @@ public class CreateTaskActivity extends AppCompatActivity {
 
     /**
      * Compare if the task id from recycled view matches the one stored in the arrayList. If it matches then it returns that specific task.
+     *
      * @param taskId
      * @param tasks
      * @return
@@ -158,6 +185,32 @@ public class CreateTaskActivity extends AppCompatActivity {
             }
         }
         return null;
+    }
+
+
+    private void getWeatherForCoords(double lat, double lon, String appid, String units) {
+        try {
+            service.getWeatherData(lat, lon, appid, units, new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) {
+                    weatherInfo = (WeatherInfo) response.body();
+                    //String place = weatherInfo.getName();
+                    weatherCelsius = weatherInfo.getMain().getTemp();
+
+//                    name.setText("Place: "+place);
+//                    temperaturePlace.setText("Weather: "+temperature+" \u2109");
+
+                }
+
+                @Override
+                public void onFailure(Call call, Throwable t) {
+
+                }
+
+            });
+        } catch (IOException e) {
+//            Toast.makeText(PlaceholderActivity.this, "igy jartal ", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
