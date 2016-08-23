@@ -8,7 +8,7 @@ import com.example.practica.geotasks.weather.WeatherInfo;
 public class Task {
     private int _id;
     private String taskName, destinationName;
-    private double destinationLongitude, destinationLatitude;
+    private double destinationLongitude, destinationLatitude, weather;
     private long intervalStart, intervalEnd;
     private int geofenceRadius;
     private WeatherInfo weatherInfo;
@@ -26,13 +26,11 @@ public class Task {
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
         this.geofenceRadius = geofenceRadius;
-        this.weatherInfo=new WeatherInfo();
-        weatherInfo.getMain().setTemp(weather);
-
+        this.weatherInfo = new WeatherInfo();
+        this.weather = weather;
 
 
     }
-
 
 
     public int get_id() {
@@ -99,12 +97,21 @@ public class Task {
         this.geofenceRadius = geofenceRadius;
     }
 
-    public WeatherInfo getWeatherInfo() {
-        return weatherInfo;
+//    public WeatherInfo getWeatherInfo() {
+//        return weatherInfo;
+//    }
+//
+//    public void setWeatherInfo(WeatherInfo weatherInfo) {
+//        this.weatherInfo = weatherInfo;
+//    }
+
+
+    public double getWeather() {
+        return weather;
     }
 
-    public void setWeatherInfo(WeatherInfo weatherInfo) {
-        this.weatherInfo = weatherInfo;
+    public void setWeather(double weather) {
+        this.weather = weather;
     }
 
     @Override

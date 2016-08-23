@@ -65,7 +65,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
 
         holder.taskName.setText(task.getTaskName());
         holder.destination.setText(task.getDestinationName());
-        holder.currentWeather.setText(String.valueOf(task.getWeatherInfo().getMain().getTemp()));
+        holder.currentWeather.setText(String.valueOf(task.getWeather())+" \u2103");
 
     }
 

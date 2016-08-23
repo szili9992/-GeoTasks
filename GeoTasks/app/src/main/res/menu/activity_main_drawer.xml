@@ -10,15 +10,18 @@
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="Gallery" />
+            android:title="start geofence"
+            android:onClick="startGeofenceMonitoring"/>
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:title="stop geofence"
+            android:onClick="stopgeofence"/>
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="start location monitoring"
+            android:onClick="startLocationMonitoring"/>
     </group>
 
     <item android:title="Communicate">

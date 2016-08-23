@@ -31,22 +31,28 @@ import retrofit2.Response;
 public class CreateTaskActivity extends AppCompatActivity {
 
     private static final int PLACE_PICKER_FLAG = 1;
+    private final String API_KEY = "8617b30a6fc114ad2ad929c111b76edf";
+    private final String UNITS = "metric";
+
     private EditText taskName, taskDate;
     private TextView longitude, latitude, destination, intervalStart, intervalEnd, geofenceRadius;
     private TasksDataSource taskDataSource;
     private Place place;
-    private Task selectedTask;
+    private Task selectedTask, createTask;
     private boolean update = false;
     private WeatherInfoService service;
     private WeatherInfo weatherInfo;
-    private double weatherCelsius;
+    private Intent editIntent;
+    private ArrayList<Task> allTasks;
+
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_task);
-        Intent editIntent = getIntent();
+        editIntent = getIntent();
+        service = new WeatherInfoService();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -62,28 +68,11 @@ public class CreateTaskActivity extends AppCompatActivity {
         taskDataSource = new TasksDataSource(this);
         taskDataSource.open();
 
-        ArrayList<Task> allTasks = taskDataSource.getAllTasks();
-
+        allTasks = taskDataSource.getAllTasks();
 
         if (editIntent.getExtras() != null) {
-            int taskId = editIntent.getExtras().getInt("id");
-            selectedTask = getTask(taskId, allTasks);
-
-            taskName.setText(selectedTask.getTaskName());
-            longitude.setText(String.valueOf(selectedTask.getDestinationLongitude()));
-            latitude.setText(String.valueOf(selectedTask.getDestinationLatitude()));
-            destination.setText(selectedTask.getDestinationName());
-            intervalStart.setText(String.valueOf(selectedTask.getIntervalStart()));
-            intervalEnd.setText(String.valueOf(selectedTask.getIntervalEnd()));
-            geofenceRadius.setText(String.valueOf(selectedTask.getGeofenceRadius()));
-
-            update = true;
+            editTask();
         }
-
-
-        service = new WeatherInfoService();
-
-
     }
 
     /**
@@ -93,30 +82,37 @@ public class CreateTaskActivity extends AppCompatActivity {
      */
     public void addTask(View view) {
         Intent addTaskIntent = new Intent(CreateTaskActivity.this, MainActivity.class);
-        Task task = new Task();
-        task.setTaskName(taskName.getText().toString());
-        task.setDestinationName(place.getName().toString());
-        task.setDestinationLongitude(place.getLatLng().longitude);
-        task.setDestinationLatitude(place.getLatLng().latitude);
-        task.setIntervalStart(11);
-        task.setIntervalEnd(34);
-
-        getWeatherForCoords(place.getLatLng().longitude, place.getLatLng().latitude, "8617b30a6fc114ad2ad929c111b76edf", "metric");
-        Log.e("weatherinfo :", weatherInfo.toString());
-        try {
-            task.setWeatherInfo(weatherInfo);
-        }catch (Exception e){
-            Log.e("weatherinfo :", weatherInfo.toString());
-        }
-
+        createTask = new Task();
+        createTask.setTaskName(taskName.getText().toString());
+        createTask.setDestinationName(place.getName().toString());
+        createTask.setDestinationLongitude(place.getLatLng().longitude);
+        createTask.setDestinationLatitude(place.getLatLng().latitude);
+        createTask.setIntervalStart(11);
+        createTask.setIntervalEnd(34);
+        createTask.setWeather(weatherInfo.getMain().getTemp());
 
         if (update) {
-            task.set_id(selectedTask.get_id());
-            taskDataSource.editTask(task);
+            createTask.set_id(selectedTask.get_id());
+            taskDataSource.editTask(createTask);
         } else {
-            taskDataSource.creatTask(task);
+            taskDataSource.creatTask(createTask);
         }
         startActivity(addTaskIntent);
+    }
+
+    public void editTask() {
+        int taskId = editIntent.getExtras().getInt("id");
+        selectedTask = getTask(taskId, allTasks);
+
+        taskName.setText(selectedTask.getTaskName());
+        longitude.setText(String.valueOf(selectedTask.getDestinationLongitude()));
+        latitude.setText(String.valueOf(selectedTask.getDestinationLatitude()));
+        destination.setText(selectedTask.getDestinationName());
+        intervalStart.setText(String.valueOf(selectedTask.getIntervalStart()));
+        intervalEnd.setText(String.valueOf(selectedTask.getIntervalEnd()));
+        geofenceRadius.setText(String.valueOf(selectedTask.getGeofenceRadius()));
+
+        update = true;
     }
 
     /**
@@ -149,6 +145,7 @@ public class CreateTaskActivity extends AppCompatActivity {
                     longitude.setText(String.valueOf(place.getLatLng().longitude));
                     latitude.setText(String.valueOf(place.getLatLng().latitude));
                     destination.setText(place.getName());
+                    getWeatherForCoords(place.getLatLng().latitude, place.getLatLng().longitude, API_KEY, UNITS);
                     break;
             }
         }
@@ -188,23 +185,17 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
 
-    private void getWeatherForCoords(double lat, double lon, String appid, String units) {
+    private void getWeatherForCoords(double lat, double lon, String appId, String units) {
         try {
-            service.getWeatherData(lat, lon, appid, units, new Callback() {
+            service.getWeatherData(lat, lon, appId, units, new Callback() {
                 @Override
                 public void onResponse(Call call, Response response) {
                     weatherInfo = (WeatherInfo) response.body();
-                    //String place = weatherInfo.getName();
-                    weatherCelsius = weatherInfo.getMain().getTemp();
-
-//                    name.setText("Place: "+place);
-//                    temperaturePlace.setText("Weather: "+temperature+" \u2109");
-
                 }
 
                 @Override
                 public void onFailure(Call call, Throwable t) {
-
+                    Log.e("something went wrong", t.toString());
                 }
 
             });

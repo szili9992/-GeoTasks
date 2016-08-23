@@ -1,12 +1,22 @@
 package com.example.practica.geotasks.activities;
 
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.nfc.Tag;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -19,15 +29,28 @@ import android.view.MenuItem;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.example.practica.geotasks.GeofenceIntent;
+import com.example.practica.geotasks.Manifest;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.utilities.RecyclerTouchListener;
 import com.example.practica.geotasks.models.Task;
 import com.example.practica.geotasks.data.TasksDataSource;
 import com.example.practica.geotasks.adapters.TaskAdapter;
 import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
 
@@ -44,15 +67,46 @@ public class MainActivity extends AppCompatActivity
     private TasksDataSource taskDataSource;
     private ArrayList<Task> taskList;
     private int taskId;
+    private String[] PERMISSIONS = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};
+
+    GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        FacebookSdk.sdkInitialize(getApplicationContext());
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View hView = navigationView.inflateHeaderView(R.layout.nav_header_main);
         facebookProfilePicture = (CircularImageView) hView.findViewById(R.id.fbProfilePicture);
+
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, 1);
+        }
+
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        Log.d("Connection success", "1");
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        Log.d("Connection suspended", "2");
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.d("Connection failed", connectionResult.getErrorMessage());
+                    }
+                })
+                .build();
 
 
         taskDataSource = new TasksDataSource(this);
@@ -83,14 +137,14 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view, int position) {
                 Intent intent = new Intent(MainActivity.this, CreateTaskActivity.class);
                 Task task = taskAdapter.getTask(position);
-                intent.putExtra("id",task.get_id());
+                intent.putExtra("id", task.get_id());
                 startActivity(intent);
             }
 
             @Override
             public void onLongClick(View view, final int position) {
                 Task task = taskAdapter.getTask(position);
-                taskId=task.get_id();
+                taskId = task.get_id();
                 alertDialogShow(taskId);
             }
         }));
@@ -178,6 +232,24 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        int response = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(this);
+        if (response != ConnectionResult.SUCCESS) {
+            GoogleApiAvailability.getInstance().getErrorDialog(this, response, 1).show();
+        } else {
+            Log.d("Play services available", "ok");
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        googleApiClient.reconnect();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        googleApiClient.disconnect();
     }
 
     /**
@@ -215,7 +287,7 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void alertDialogShow(final int position){
+    public void alertDialogShow(final int position) {
 
         MaterialDialog.Builder builder = new MaterialDialog.Builder(MainActivity.this)
                 .content(R.string.alert_dialog_content)
@@ -251,7 +323,84 @@ public class MainActivity extends AppCompatActivity
 
 
     public void placeholder(MenuItem item) {
-        Intent intent=new Intent(MainActivity.this,PlaceholderActivity.class);
+        Intent intent = new Intent(MainActivity.this, PlaceholderActivity.class);
         startActivity(intent);
+    }
+
+    public static boolean hasPermissions(Context context, String[] permissions) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+    public void startLocationMonitoring(MenuItem item) {
+        try {
+            LocationRequest locationRequest = LocationRequest.create()
+                    .setInterval(10000)
+                    .setFastestInterval(5000)
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    Log.d("location changed", "lat/long update" + location.getLatitude() + " " + location.getLongitude());
+                }
+            });
+        } catch (SecurityException e) {
+            Log.d("error","Security exception"+e.getMessage());
+        }
+    }
+
+    public void startGeofenceMonitoring(MenuItem item){
+        try{
+            Geofence geofence=new Geofence.Builder()
+                    .setRequestId("MyGeofenceId")
+                    .setCircularRegion(46,24,1000)
+                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                    .setNotificationResponsiveness(1000)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER|Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .build();
+            GeofencingRequest geofencingRequest=new GeofencingRequest.Builder()
+                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+                    .addGeofence(geofence)
+                    .build();
+
+            Intent intent=new Intent(this, GeofenceIntent.class);
+            PendingIntent pendingIntent=PendingIntent.getService(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+            if (!googleApiClient.isConnected()){
+                Log.d("api client","not connected");
+            }
+            else{
+                LocationServices.GeofencingApi.addGeofences(googleApiClient,geofencingRequest,pendingIntent)
+                        .setResultCallback(new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(@NonNull Status status) {
+                                if (status.isSuccess()){
+                                    Log.d("succes","succesfully added geofence");
+                                }
+                                else{
+                                    Log.d("failed","failed to add geofence"+status.getStatus());
+                                }
+                            }
+                        });
+            }
+        }
+        catch (SecurityException e){
+            Log.d("security",e.getMessage());
+        }
+    }
+
+    public void stopgeofence(MenuItem item){
+        ArrayList<String> geofenceIds=new ArrayList<>();
+        geofenceIds.add("MyGeofenceId");
+        LocationServices.GeofencingApi.removeGeofences(googleApiClient,geofenceIds);
     }
 }
