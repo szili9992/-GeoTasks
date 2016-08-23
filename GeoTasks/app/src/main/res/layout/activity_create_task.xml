@@ -12,41 +12,67 @@
     tools:context=".activities.CreateTaskActivity">
 
 
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/input_layout_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <EditText
-        android:id="@+id/taskName"
-        android:layout_width="fill_parent"
+        <EditText
+            android:id="@+id/taskName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Task name"
+            android:singleLine="true"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+
+    <!--<EditText-->
+        <!--android:id="@+id/taskName"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:hint="Task name"-->
+        <!--android:singleLine="true" />-->
+
+
+
+    <TextView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Task name"
-        android:singleLine="true" />
+        android:text="Geofence radius:"
+        android:layout_marginTop="10dp"
+        />
 
-
-
+    <!--<android.support.v7.widget.AppCompatSeekBar-->
+        <!--android:id="@+id/geofenceRadiusSeek"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginTop="10dp"-->
+        <!--android:layout_marginBottom="10dp"-->
+        <!--android:max="1000"-->
+        <!--android:progress="100"/>-->
 
     <org.adw.library.widgets.discreteseekbar.DiscreteSeekBar
+        android:id="@+id/seekBar"
         android:paddingTop="10dp"
         android:paddingBottom="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:dsb_indicatorElevation="0dp"
-        app:dsb_min="1"
-        app:dsb_max="15"
+        app:dsb_min="0"
+        app:dsb_max="1000"
         />
-    <TextView
-        android:id="@+id/destinationName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:hint="destination"/>
+
 
     <Button
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:text="Choose location"
         android:onClick="chooseDestination"
         android:background="@color/cast_intro_overlay_button_background_color"/>
     <Button
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:text="Done"
         android:onClick="addTask"/>
     <TextView
@@ -75,6 +101,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="geofenceradius"/>
+    <TextView
+        android:id="@+id/destinationName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="destinationName"/>
 
 
 </LinearLayout>

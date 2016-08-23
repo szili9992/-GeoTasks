@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +21,9 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+
+import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
+import org.adw.library.widgets.discreteseekbar.internal.compat.SeekBarCompat;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -44,7 +48,8 @@ public class CreateTaskActivity extends AppCompatActivity {
     private WeatherInfo weatherInfo;
     private Intent editIntent;
     private ArrayList<Task> allTasks;
-
+    private DiscreteSeekBar seekBar;
+    private int seekBarValue;
 
 
     @Override
@@ -64,6 +69,28 @@ public class CreateTaskActivity extends AppCompatActivity {
         intervalStart = (TextView) findViewById(R.id.intervalStart);
         intervalEnd = (TextView) findViewById(R.id.intervalEnd);
         geofenceRadius = (TextView) findViewById(R.id.geofenceRadius);
+        seekBar = (DiscreteSeekBar) findViewById(R.id.seekBar);
+
+
+
+
+        seekBar.setOnProgressChangeListener(new DiscreteSeekBar.OnProgressChangeListener() {
+            @Override
+            public void onProgressChanged(DiscreteSeekBar seekBar, int value, boolean fromUser) {
+                seekBarValue = value;
+            }
+
+            @Override
+            public void onStartTrackingTouch(DiscreteSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
+                geofenceRadius.setText(String.valueOf(seekBarValue));
+            }
+        });
+
 
         taskDataSource = new TasksDataSource(this);
         taskDataSource.open();
@@ -89,7 +116,9 @@ public class CreateTaskActivity extends AppCompatActivity {
         createTask.setDestinationLatitude(place.getLatLng().latitude);
         createTask.setIntervalStart(11);
         createTask.setIntervalEnd(34);
+        createTask.setGeofenceRadius(seekBarValue);
         createTask.setWeather(weatherInfo.getMain().getTemp());
+
 
         if (update) {
             createTask.set_id(selectedTask.get_id());
@@ -116,7 +145,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
     /**
-     * Chose destination with Google Places API Place picket
+     * Chose destination with Google Places API Place picker
      *
      * @param view
      */
@@ -185,6 +214,14 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Get current weather with the coordinates provided by Google Places picker, in metric.
+     *
+     * @param lat
+     * @param lon
+     * @param appId
+     * @param units
+     */
     private void getWeatherForCoords(double lat, double lon, String appId, String units) {
         try {
             service.getWeatherData(lat, lon, appId, units, new Callback() {
@@ -200,7 +237,7 @@ public class CreateTaskActivity extends AppCompatActivity {
 
             });
         } catch (IOException e) {
-//            Toast.makeText(PlaceholderActivity.this, "igy jartal ", Toast.LENGTH_SHORT).show();
+            Toast.makeText(CreateTaskActivity.this, "Something went wrong with getting the current weather", Toast.LENGTH_SHORT).show();
         }
     }
 
