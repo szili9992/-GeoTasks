@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/headerView"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/side_nav_bar"
-    android:gravity="bottom"
+    android:gravity="start"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -14,14 +14,27 @@
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <com.mikhaellopez.circularimageview.CircularImageView
-        android:id="@+id/fbProfilePicture"
-        android:paddingTop="20dp"
-        android:layout_width="110dp"
-        android:layout_height="110dp"
-        android:layout_gravity="center"
-        app:civ_border_color="#000000"
-        app:civ_border_width="2dp"
-        app:civ_shadow="false"
-        />
+        android:id="@+id/fb_profile_picture"
+        android:layout_width="62dp"
+        android:layout_height="62dp"
+        android:layout_marginTop="15dp"
+        android:src="@drawable/profile_picture_placeholder"
+        app:civ_border_width="0dp"
+        app:civ_shadow="false" />
+
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:hint="@string/name_placeholder"
+        android:textColor="#fff" />
+
+    <TextView
+        android:id="@+id/user_email"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="@string/email_placeholder"
+        android:textColor="#fff" />
 
 </LinearLayout>

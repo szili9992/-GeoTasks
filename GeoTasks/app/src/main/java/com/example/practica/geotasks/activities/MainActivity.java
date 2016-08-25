@@ -1,18 +1,16 @@
 package com.example.practica.geotasks.activities;
 
-import android.app.PendingIntent;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Location;
-import android.nfc.Tag;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,11 +24,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
+import android.widget.TextView;
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.example.practica.geotasks.GeofenceIntent;
-import com.example.practica.geotasks.Manifest;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.utilities.RecyclerTouchListener;
 import com.example.practica.geotasks.models.Task;
@@ -43,19 +39,9 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingRequest;
-import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationServices;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
-
 import org.json.JSONObject;
-
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
@@ -63,13 +49,14 @@ public class MainActivity extends AppCompatActivity
 
     private TaskAdapter taskAdapter;
     private CircularImageView facebookProfilePicture;
-    private String fbJsonData;
     private TasksDataSource taskDataSource;
     private ArrayList<Task> taskList;
     private int taskId;
     private String[] PERMISSIONS = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};
+    private TextView userEmail, userName;
+//    private GeofenceBuilder geofenceBuilder;
+//    private GoogleApiClient googleApiClient;
 
-    GoogleApiClient googleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +66,11 @@ public class MainActivity extends AppCompatActivity
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View hView = navigationView.inflateHeaderView(R.layout.nav_header_main);
-        facebookProfilePicture = (CircularImageView) hView.findViewById(R.id.fbProfilePicture);
+        facebookProfilePicture = (CircularImageView) hView.findViewById(R.id.fb_profile_picture);
+        userEmail = (TextView) hView.findViewById(R.id.user_email);
+        userName = (TextView) hView.findViewById(R.id.user_name);
+
+//        geofenceBuilder=new GeofenceBuilder();
 
 
         if (!hasPermissions(this, PERMISSIONS)) {
@@ -87,41 +78,14 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
-                    @Override
-                    public void onConnected(@Nullable Bundle bundle) {
-                        Log.d("Connection success", "1");
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {
-                        Log.d("Connection suspended", "2");
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Log.d("Connection failed", connectionResult.getErrorMessage());
-                    }
-                })
-                .build();
-
-
         taskDataSource = new TasksDataSource(this);
         taskDataSource.open();
         taskList = taskDataSource.getAllTasks();
 
 
-        getUserInfo();
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                setUserProfile(fbJsonData);
-            }
-        }, 500);
+        if (checkForConnection()) {
+            new FacebookAsyncTask().execute();
+        }
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -243,48 +207,26 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-        googleApiClient.reconnect();
+//        googleApiClient.reconnect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        googleApiClient.disconnect();
+//        googleApiClient.disconnect();
     }
 
     /**
      * Request user data from Facebook. Result is a JSON object that is stored in fbJsonData String which is then passed to setUserProfile();
      */
-    private void getUserInfo() {
-        GraphRequest data_request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-            @Override
-            public void onCompleted(JSONObject json_object, GraphResponse response) {
-                fbJsonData = json_object.toString();
-            }
-        });
-        Bundle permission_param = new Bundle();
-        permission_param.putString("fields", "id,name,email,picture.width(200).height(200)");
-        data_request.setParameters(permission_param);
-        data_request.executeAsync();
-    }
-
-    /**
-     * Display current user data using the JSON object from getUserInfo()
-     *
-     * @param jsonData
-     */
-    public void setUserProfile(String jsonData) {
-        try {
-            JSONObject response = new JSONObject(jsonData);
-            //user_email.setText(response.get("email").toString());
-            //user_name.setText(response.get("name").toString());
-            JSONObject profile_pic_data = new JSONObject(response.get("picture").toString());
-            JSONObject profile_pic_url = new JSONObject(profile_pic_data.getString("data"));
-            Picasso.with(this).load(profile_pic_url.getString("url")).into(facebookProfilePicture);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//
+//
+//    /**
+//     * Display current user data using the JSON object from getUserInfo()
+//     *
+//     * @param jsonData
+//     */
+//
 
 
     public void alertDialogShow(final int position) {
@@ -322,11 +264,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void placeholder(MenuItem item) {
-        Intent intent = new Intent(MainActivity.this, PlaceholderActivity.class);
-        startActivity(intent);
-    }
-
     public static boolean hasPermissions(Context context, String[] permissions) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -339,68 +276,55 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public void startLocationMonitoring(MenuItem item) {
-        try {
-            LocationRequest locationRequest = LocationRequest.create()
-                    .setInterval(10000)
-                    .setFastestInterval(5000)
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    private boolean checkForConnection() {
+        ConnectivityManager cm =
+                (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+    }
+
+    private class FacebookAsyncTask extends AsyncTask<Void,Void,Void>{
+        String fbJsonData;
+        ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            dialog=ProgressDialog.show(MainActivity.this,"Loading...","Getting Facebook data.");
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            GraphRequest data_request = GraphRequest.newMeRequest(AccessToken.getCurrentAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
                 @Override
-                public void onLocationChanged(Location location) {
-                    Log.d("location changed", "lat/long update" + location.getLatitude() + " " + location.getLongitude());
+                public void onCompleted(JSONObject json_object, GraphResponse response) {
+                    fbJsonData = json_object.toString();
+                    Log.e("Succes","itt vagyok");
                 }
             });
-        } catch (SecurityException e) {
-            Log.d("error","Security exception"+e.getMessage());
+            Bundle permission_param = new Bundle();
+            permission_param.putString("fields", "id,name,email,picture.width(200).height(200)");
+            data_request.setParameters(permission_param);
+            data_request.executeAndWait();
+
+            return null;
         }
-    }
 
-    public void startGeofenceMonitoring(MenuItem item){
-        try{
-            Geofence geofence=new Geofence.Builder()
-                    .setRequestId("MyGeofenceId")
-                    .setCircularRegion(46,24,1000)
-                    .setExpirationDuration(Geofence.NEVER_EXPIRE)
-                    .setNotificationResponsiveness(1000)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER|Geofence.GEOFENCE_TRANSITION_EXIT)
-                    .build();
-            GeofencingRequest geofencingRequest=new GeofencingRequest.Builder()
-                    .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-                    .addGeofence(geofence)
-                    .build();
-
-            Intent intent=new Intent(this, GeofenceIntent.class);
-            PendingIntent pendingIntent=PendingIntent.getService(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-            if (!googleApiClient.isConnected()){
-                Log.d("api client","not connected");
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            try {
+                JSONObject response = new JSONObject(fbJsonData);
+                userEmail.setText(response.get("email").toString());
+                userName.setText(response.get("name").toString());
+                JSONObject profile_pic_data = new JSONObject(response.get("picture").toString());
+                JSONObject profile_pic_url = new JSONObject(profile_pic_data.getString("data"));
+                Picasso.with(MainActivity.this).load(profile_pic_url.getString("url")).into(facebookProfilePicture);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            else{
-                LocationServices.GeofencingApi.addGeofences(googleApiClient,geofencingRequest,pendingIntent)
-                        .setResultCallback(new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(@NonNull Status status) {
-                                if (status.isSuccess()){
-                                    Log.d("succes","succesfully added geofence");
-                                }
-                                else{
-                                    Log.d("failed","failed to add geofence"+status.getStatus());
-                                }
-                            }
-                        });
-            }
+            dialog.dismiss();
         }
-        catch (SecurityException e){
-            Log.d("security",e.getMessage());
-        }
-    }
-
-    public void stopgeofence(MenuItem item){
-        ArrayList<String> geofenceIds=new ArrayList<>();
-        geofenceIds.add("MyGeofenceId");
-        LocationServices.GeofencingApi.removeGeofences(googleApiClient,geofenceIds);
     }
 }

@@ -1,32 +1,48 @@
 package com.example.practica.geotasks.activities;
 
+import android.app.DatePickerDialog;
+import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.Intent;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.practica.geotasks.GeofenceBuilder;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.models.Task;
 import com.example.practica.geotasks.data.TasksDataSource;
+import com.example.practica.geotasks.service.GeofenceService;
 import com.example.practica.geotasks.weather.WeatherInfo;
 import com.example.practica.geotasks.weather.WeatherInfoService;
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingRequest;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
-
 import org.adw.library.widgets.discreteseekbar.DiscreteSeekBar;
-import org.adw.library.widgets.discreteseekbar.internal.compat.SeekBarCompat;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -38,7 +54,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     private final String API_KEY = "8617b30a6fc114ad2ad929c111b76edf";
     private final String UNITS = "metric";
 
-    private EditText taskName, taskDate;
+    private EditText taskName;
     private TextView longitude, latitude, destination, intervalStart, intervalEnd, geofenceRadius;
     private TasksDataSource taskDataSource;
     private Place place;
@@ -50,6 +66,11 @@ public class CreateTaskActivity extends AppCompatActivity {
     private ArrayList<Task> allTasks;
     private DiscreteSeekBar seekBar;
     private int seekBarValue;
+    private String intStart,intEnd;
+    private GoogleApiClient googleApiClient;
+    private GeofenceBuilder geofenceBuilder;
+
+
 
 
     @Override
@@ -58,18 +79,43 @@ public class CreateTaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_task);
         editIntent = getIntent();
         service = new WeatherInfoService();
+        geofenceBuilder=new GeofenceBuilder();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        taskName = (EditText) findViewById(R.id.taskName);
-        longitude = (TextView) findViewById(R.id.longitude);
-        latitude = (TextView) findViewById(R.id.latitude);
-        destination = (TextView) findViewById(R.id.destinationName);
-        intervalStart = (TextView) findViewById(R.id.intervalStart);
-        intervalEnd = (TextView) findViewById(R.id.intervalEnd);
-        geofenceRadius = (TextView) findViewById(R.id.geofenceRadius);
-        seekBar = (DiscreteSeekBar) findViewById(R.id.seekBar);
+        taskName = (EditText) findViewById(R.id.task_name);
+        longitude = (TextView) findViewById(R.id.longitude_value);
+        latitude = (TextView) findViewById(R.id.latitude_value);
+        destination = (TextView) findViewById(R.id.destination_value);
+        intervalStart = (TextView) findViewById(R.id.interval_start);
+        intervalEnd = (TextView) findViewById(R.id.interval_end);
+        geofenceRadius = (TextView) findViewById(R.id.geofence_radius_value);
+        seekBar = (DiscreteSeekBar) findViewById(R.id.radius_seek_bar);
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        Log.d("Connection success", "1");
+                    }
+
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        Log.d("Connection suspended", "2");
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.d("Connection failed", connectionResult.getErrorMessage());
+                    }
+                })
+                .build();
+        googleApiClient.connect();
+
+
 
 
 
@@ -87,7 +133,7 @@ public class CreateTaskActivity extends AppCompatActivity {
 
             @Override
             public void onStopTrackingTouch(DiscreteSeekBar seekBar) {
-                geofenceRadius.setText(String.valueOf(seekBarValue));
+                geofenceRadius.setText(String.valueOf(seekBarValue)+" meters");
             }
         });
 
@@ -114,10 +160,17 @@ public class CreateTaskActivity extends AppCompatActivity {
         createTask.setDestinationName(place.getName().toString());
         createTask.setDestinationLongitude(place.getLatLng().longitude);
         createTask.setDestinationLatitude(place.getLatLng().latitude);
-        createTask.setIntervalStart(11);
-        createTask.setIntervalEnd(34);
+        createTask.setIntervalStart(intStart);
+        createTask.setIntervalEnd(intEnd);
         createTask.setGeofenceRadius(seekBarValue);
         createTask.setWeather(weatherInfo.getMain().getTemp());
+
+        if(place.getLatLng()!=null) {
+            geofenceBuilder.startGeofenceMonitoring(CreateTaskActivity.this, googleApiClient,
+                    taskName.getText().toString(), place.getLatLng().latitude,
+                    place.getLatLng().longitude, seekBarValue);
+            geofenceBuilder.startLocationMonitoring(googleApiClient);
+        }
 
 
         if (update) {
@@ -139,7 +192,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         destination.setText(selectedTask.getDestinationName());
         intervalStart.setText(String.valueOf(selectedTask.getIntervalStart()));
         intervalEnd.setText(String.valueOf(selectedTask.getIntervalEnd()));
-        geofenceRadius.setText(String.valueOf(selectedTask.getGeofenceRadius()));
+        geofenceRadius.setText(String.valueOf(selectedTask.getGeofenceRadius())+" meters");
 
         update = true;
     }
@@ -240,6 +293,36 @@ public class CreateTaskActivity extends AppCompatActivity {
             Toast.makeText(CreateTaskActivity.this, "Something went wrong with getting the current weather", Toast.LENGTH_SHORT).show();
         }
     }
+
+
+    public void startTime(View view) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                intStart = String.format("%02d:%02d", hour, minute);
+                intervalStart.setText(intStart);
+            }
+        },calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),true);
+        timePickerDialog.show();
+
+
+    }
+    public void endTime(View view) {
+        Calendar calendar = Calendar.getInstance();
+        TimePickerDialog timePickerDialog=new TimePickerDialog(this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, int hour, int minute) {
+                intEnd=String.format("%02d:%02d", hour, minute);
+                intervalEnd.setText(intEnd);
+            }
+        },calendar.get(Calendar.HOUR_OF_DAY),calendar.get(Calendar.MINUTE),true);
+        timePickerDialog.show();
+
+    }
+
+
+
 
 
 }

@@ -17,14 +17,13 @@
 
     <TextView
         android:id="@+id/weather"
-        android:layout_width="wrap_content"
+        android:layout_width="60dp"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_marginLeft="22dp"
         android:layout_marginStart="22dp"
         android:layout_toEndOf="@+id/im_item_icon"
-        android:layout_toRightOf="@+id/im_item_icon"
-        android:hint="clock" />
+        android:layout_toRightOf="@+id/im_item_icon" />
 
     <TextView
         android:id="@+id/task"
@@ -45,7 +44,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/task"
         android:layout_marginLeft="120dp"
-
         android:ellipsize="end"
         android:fontFamily="sans-serif"
         android:singleLine="true"

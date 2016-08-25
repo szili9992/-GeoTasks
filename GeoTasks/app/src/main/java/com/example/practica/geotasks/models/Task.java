@@ -7,17 +7,18 @@ import com.example.practica.geotasks.weather.WeatherInfo;
  */
 public class Task {
     private int _id;
-    private String taskName, destinationName;
+    private String taskName, destinationName,intervalStart, intervalEnd;;
     private double destinationLongitude, destinationLatitude, weather;
-    private long intervalStart, intervalEnd;
     private int geofenceRadius;
-    private WeatherInfo weatherInfo;
+
+
 
 
     public Task() {
     }
 
-    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, long intervalStart, long intervalEnd, int geofenceRadius, double weather) {
+    public Task(int _id, String taskName, String destinationName, double destinationLongitude, double destinationLatitude, String intervalStart, String intervalEnd, int geofenceRadius, double weather) {
+
         this._id = _id;
         this.taskName = taskName;
         this.destinationName = destinationName;
@@ -26,7 +27,6 @@ public class Task {
         this.intervalStart = intervalStart;
         this.intervalEnd = intervalEnd;
         this.geofenceRadius = geofenceRadius;
-        this.weatherInfo = new WeatherInfo();
         this.weather = weather;
 
 
@@ -73,19 +73,19 @@ public class Task {
         this.destinationLatitude = destinationLatitude;
     }
 
-    public long getIntervalStart() {
+    public String getIntervalStart() {
         return intervalStart;
     }
 
-    public void setIntervalStart(long intervalStart) {
+    public void setIntervalStart(String intervalStart) {
         this.intervalStart = intervalStart;
     }
 
-    public long getIntervalEnd() {
+    public String getIntervalEnd() {
         return intervalEnd;
     }
 
-    public void setIntervalEnd(long intervalEnd) {
+    public void setIntervalEnd(String intervalEnd) {
         this.intervalEnd = intervalEnd;
     }
 
@@ -96,15 +96,6 @@ public class Task {
     public void setGeofenceRadius(int geofenceRadius) {
         this.geofenceRadius = geofenceRadius;
     }
-
-//    public WeatherInfo getWeatherInfo() {
-//        return weatherInfo;
-//    }
-//
-//    public void setWeatherInfo(WeatherInfo weatherInfo) {
-//        this.weatherInfo = weatherInfo;
-//    }
-
 
     public double getWeather() {
         return weather;
@@ -125,7 +116,6 @@ public class Task {
                 ", intervalStart=" + intervalStart +
                 ", intervalEnd=" + intervalEnd +
                 ", geofenceRadius=" + geofenceRadius +
-                ", weatherInfo=" + weatherInfo +
                 '}';
     }
 }

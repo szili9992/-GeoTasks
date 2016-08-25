@@ -23,8 +23,8 @@ public class TaskSQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_DESTINATION_NAME + " text, "
             + COLUMN_DESTINATION_LONGITUDE + " double, "
             + COLUMN_DESTINATION_LATITUDE + " double, "
-            + COLUMN_INTERVAL_START + " long, "
-            + COLUMN_INTERVAL_END + " long, "
+            + COLUMN_INTERVAL_START + " text, "
+            + COLUMN_INTERVAL_END + " text, "
             + COLUMN_GEOFENCE_RADIUS + " int, "
             + COLUMN_WEATHER + " double);";
 

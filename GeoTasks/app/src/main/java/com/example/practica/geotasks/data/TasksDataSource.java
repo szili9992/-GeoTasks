@@ -54,7 +54,7 @@ public class TasksDataSource {
     }
 
     private Task cursorToTask(Cursor cursor) {
-        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getLong(5), cursor.getLong(6), cursor.getInt(7),cursor.getDouble(8));
+        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getString(5), cursor.getString(6), cursor.getInt(7),cursor.getDouble(8));
         return task;
     }
 
