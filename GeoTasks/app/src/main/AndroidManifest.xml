@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
@@ -26,14 +26,15 @@
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name="com.facebook.FacebookActivity"
             android:configChanges="keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
-        <activity android:name=".activities.LogInActivity" android:theme="@style/AppTheme.BrandedLaunch">
+        <activity
+            android:name=".activities.LogInActivity"
+            android:theme="@style/AppTheme.BrandedLaunch">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,9 +44,11 @@
         <activity
             android:name=".activities.CreateTaskActivity"
             android:label="Create new task" />
-        <activity android:name=".activities.PlaceholderActivity">
-        </activity>
-        <service android:name=".service.GeofenceService" android:exported="true" android:enabled="true"/>
+
+        <service
+            android:name=".service.GeofenceService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>
