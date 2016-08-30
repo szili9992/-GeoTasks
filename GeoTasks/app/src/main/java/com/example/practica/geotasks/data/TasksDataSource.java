@@ -20,7 +20,7 @@ public class TasksDataSource {
     private String[] allColumns = {TaskSQLiteHelper.COLUMN_ID, TaskSQLiteHelper.COLUMN_TASK_NAME,
             TaskSQLiteHelper.COLUMN_DESTINATION_NAME, TaskSQLiteHelper.COLUMN_DESTINATION_LONGITUDE,
             TaskSQLiteHelper.COLUMN_DESTINATION_LATITUDE, TaskSQLiteHelper.COLUMN_INTERVAL_START,
-            TaskSQLiteHelper.COLUMN_INTERVAL_END, TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS,TaskSQLiteHelper.COLUMN_WEATHER};
+            TaskSQLiteHelper.COLUMN_INTERVAL_END, TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS};
 
     public TasksDataSource(Context context) {
         dbHelper = new TaskSQLiteHelper(context);
@@ -44,7 +44,6 @@ public class TasksDataSource {
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_START, task.getIntervalStart());
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_END, task.getIntervalEnd());
         values.put(TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS, task.getGeofenceRadius());
-        values.put(TaskSQLiteHelper.COLUMN_WEATHER,task.getWeather());
         long insertId = database.insert(TaskSQLiteHelper.TABLE_TASKS, null, values);
         Cursor cursor = database.query(TaskSQLiteHelper.TABLE_TASKS, allColumns, TaskSQLiteHelper.COLUMN_ID + " = " + insertId, null, null, null, null);
         cursor.moveToFirst();
@@ -54,7 +53,7 @@ public class TasksDataSource {
     }
 
     private Task cursorToTask(Cursor cursor) {
-        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getString(5), cursor.getString(6), cursor.getInt(7),cursor.getDouble(8));
+        Task task = new Task(cursor.getInt(0), cursor.getString(1), cursor.getString(2), cursor.getDouble(3), cursor.getDouble(4), cursor.getString(5), cursor.getString(6), cursor.getInt(7));
         return task;
     }
 
@@ -92,14 +91,14 @@ public class TasksDataSource {
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_START, task.getIntervalStart());
         values.put(TaskSQLiteHelper.COLUMN_INTERVAL_END, task.getIntervalEnd());
         values.put(TaskSQLiteHelper.COLUMN_GEOFENCE_RADIUS, task.getGeofenceRadius());
-        values.put(TaskSQLiteHelper.COLUMN_WEATHER,task.getWeather());
+
 
         database.update(TaskSQLiteHelper.TABLE_TASKS, values, "_id = " + task.get_id(), null);
     }
 
     public void deleteTask(Task task) {
         int id = task.get_id();
-        System.out.println("Comment deleted with id: " + id);
+        System.out.println("Task deleted with id: " + id);
         database.delete(TaskSQLiteHelper.TABLE_TASKS, TaskSQLiteHelper.COLUMN_ID + " = " + id, null);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.practica.geotasks;
+package com.example.practica.geotasks.utilities;
 
 import android.app.PendingIntent;
 import android.content.Context;
@@ -41,55 +41,58 @@ public class GeofenceBuilder {
                 }
             });
         } catch (SecurityException e) {
-            Log.d("error","Security exception"+e.getMessage());
+            Log.d("error", "Security exception" + e.getMessage());
         }
     }
 
-    public void startGeofenceMonitoring(Context context,GoogleApiClient googleApiClient ,String requestId, double latitude, double longitude, float radius){
-        try{
-            Geofence geofence=new Geofence.Builder()
+    public void startGeofenceMonitoring(Context context, GoogleApiClient googleApiClient, String requestId, double latitude, double longitude, float radius) {
+        try {
+            Geofence geofence = new Geofence.Builder()
                     .setRequestId(requestId)
-                    .setCircularRegion(latitude,longitude,radius)
+                    .setCircularRegion(latitude, longitude, radius)
                     .setExpirationDuration(Geofence.NEVER_EXPIRE)
                     .setNotificationResponsiveness(1000)
-                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER|Geofence.GEOFENCE_TRANSITION_EXIT)
+                    .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT)
                     .build();
-            GeofencingRequest geofencingRequest=new GeofencingRequest.Builder()
+            GeofencingRequest geofencingRequest = new GeofencingRequest.Builder()
                     .setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
                     .addGeofence(geofence)
                     .build();
 
-            Intent intent=new Intent(context, GeofenceService.class);
-            PendingIntent pendingIntent=PendingIntent.getService(context,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(context, GeofenceService.class);
+            PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-            if (!googleApiClient.isConnected()){
-                Log.d("api client","not connected");
-            }
-            else{
-                LocationServices.GeofencingApi.addGeofences(googleApiClient,geofencingRequest,pendingIntent)
+            if (!googleApiClient.isConnected()) {
+                Log.d("api client", "not connected");
+            } else {
+                LocationServices.GeofencingApi.addGeofences(googleApiClient, geofencingRequest, pendingIntent)
                         .setResultCallback(new ResultCallback<Status>() {
                             @Override
                             public void onResult(@NonNull Status status) {
-                                if (status.isSuccess()){
-                                    Log.d("succes","succesfully added geofence");
-                                }
-                                else{
-                                    Log.d("failed","failed to add geofence"+status.getStatus());
+                                if (status.isSuccess()) {
+                                    Log.d("succes", "succesfully added geofence");
+                                } else {
+                                    Log.d("failed", "failed to add geofence" + status.getStatus());
                                 }
                             }
                         });
             }
-        }
-        catch (SecurityException e){
-            Log.d("security",e.getMessage());
+        } catch (SecurityException e) {
+            Log.d("security", e.getMessage());
         }
     }
 
-    public void stopGeofenceMonitoring(GoogleApiClient googleApiClient,String requestId){
-        ArrayList<String> geofenceIds=new ArrayList<>();
+    public void stopGeofenceMonitoring(GoogleApiClient googleApiClient, String requestId) {
+        ArrayList<String> geofenceIds = new ArrayList<>();
         geofenceIds.add(requestId);
-        LocationServices.GeofencingApi.removeGeofences(googleApiClient,geofenceIds);
+        LocationServices.GeofencingApi.removeGeofences(googleApiClient, geofenceIds);
+        Log.e("Geofence", "Geofence monitorin has stoped: " + requestId);
+    }
+
+
+    public void stopLocationUpdates(GoogleApiClient mGoogleApiClient, Context context) {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, (LocationListener) context);
     }
 
 

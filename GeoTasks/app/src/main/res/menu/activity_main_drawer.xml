@@ -5,22 +5,22 @@
         <item
             android:id="@+id/nav_camera"
             android:icon="@drawable/ic_menu_camera"
-            android:title="weather"
+            android:title="Stop Geofence monitoring"
             />
         <item
             android:id="@+id/nav_gallery"
             android:icon="@drawable/ic_menu_gallery"
-            android:title="start geofence"
+            android:title="Stop location monitoring"
             />
         <item
             android:id="@+id/nav_slideshow"
             android:icon="@drawable/ic_menu_slideshow"
-            android:title="stop geofence"
+            android:title="@string/placeholder"
             />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="start location monitoring"
+            android:title="@string/placeholder"
             />
     </group>
 
@@ -29,12 +29,12 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="weather"
+                android:title="@string/placeholder"
                 />
             <item
                 android:id="@+id/nav_send"
-                android:icon="@drawable/ic_menu_send"
-                android:title="Log Out"
+                android:icon="@drawable/com_facebook_button_icon_blue"
+                android:title="@string/log_out_facebook"
                 android:onClick="logOutFb"/>
         </menu>
     </item>

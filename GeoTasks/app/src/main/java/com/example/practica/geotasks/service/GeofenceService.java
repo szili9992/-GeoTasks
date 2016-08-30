@@ -3,6 +3,8 @@ package com.example.practica.geotasks.service;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -12,11 +14,14 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.example.practica.geotasks.R;
+import com.example.practica.geotasks.activities.MainActivity;
 import com.example.practica.geotasks.data.TasksDataSource;
 import com.example.practica.geotasks.models.Task;
+import com.example.practica.geotasks.weather.Main;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,13 +34,13 @@ import java.util.List;
  */
 public class GeofenceService extends IntentService {
 
-    TasksDataSource taskDataSource = new TasksDataSource(this);
-    ArrayList<Task> everyTask;
-    Task selectedTask;
-
+    private TasksDataSource taskDataSource = new TasksDataSource(this);
+    private ArrayList<Task> everyTask;
+    private Task selectedTask;
+    private Context context;
 
     public GeofenceService() {
-        super("MyGeofenceId");
+        super("GeofenceService");
     }
 
 
@@ -44,6 +49,7 @@ public class GeofenceService extends IntentService {
         taskDataSource.open();
         everyTask = taskDataSource.getAllTasks();
         GeofencingEvent event = GeofencingEvent.fromIntent(intent);
+        context = getApplicationContext();
 
 
         if (event.hasError()) {
@@ -70,21 +76,25 @@ public class GeofenceService extends IntentService {
 
     }
 
-
-    public void showNotification() {
+    /**
+     * When the user enters the geofence area and the compareTime method returns true a heads-up notification will be issued.
+     */
+    private void showNotification() {
 
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
 
-        // intent triggered, you can add other intent for other actions
-//        Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-//        PendingIntent pIntent = PendingIntent.getActivity(MainActivity.this, 0, intent, 0);
+        Intent intent = new Intent(context, MainActivity.class);
+        PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
 
         Notification mNotification = new Notification.Builder(this)
 
                 .setContentTitle("GeoTask")
                 .setContentText("One of your tasks is nearby: " + selectedTask.getDestinationName())
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_location_on)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setContentIntent(pIntent)
+                .setDefaults(Notification.DEFAULT_ALL)
                 .setLargeIcon(largeIcon)
                 .setSound(soundUri)
                 .build();
@@ -94,7 +104,14 @@ public class GeofenceService extends IntentService {
         notificationManager.notify(0, mNotification);
     }
 
-    public Task getTask(String taskName, ArrayList<Task> tasks) {
+    /**
+     * Compare the geofence received with the ones stored in the database to get the task.
+     *
+     * @param taskName
+     * @param tasks
+     * @return
+     */
+    private Task getTask(String taskName, ArrayList<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             if (taskName.equals(tasks.get(i).getTaskName())) {
                 return tasks.get(i);
@@ -103,41 +120,70 @@ public class GeofenceService extends IntentService {
         return null;
     }
 
-    public boolean compareTime() {
+    /**
+     * Compare the start and end time. If the user is in time range then it will return true else false.
+     *
+     * @return
+     */
+    private boolean compareTime() {
         Date start_time, end_time, current_time;
         Calendar calendar_start, calendar_end, calendar_current;
-        int start_time_hour, start_time_minute, end_time_hour, end_time_minute, current_time_hour, current_time_minute;
+        String currentTime;
 
+        calendar_current = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        currentTime = sdf.format(calendar_current.getTime());
         try {
-            start_time = new SimpleDateFormat("hh:mm").parse(selectedTask.getIntervalStart());
-            end_time = new SimpleDateFormat("hh:mm").parse(selectedTask.getIntervalEnd());
-
+            start_time = new SimpleDateFormat("HH:mm").parse(selectedTask.getIntervalStart());
             calendar_start = Calendar.getInstance();
             calendar_start.setTime(start_time);
-            start_time_hour = calendar_start.get(Calendar.HOUR_OF_DAY);
-            start_time_minute = calendar_start.get(Calendar.MINUTE);
 
+            end_time = new SimpleDateFormat("HH:mm").parse(selectedTask.getIntervalEnd());
             calendar_end = Calendar.getInstance();
             calendar_end.setTime(end_time);
-            end_time_hour = calendar_end.get(Calendar.HOUR_OF_DAY);
-            end_time_minute = calendar_end.get(Calendar.MINUTE);
 
-            calendar_current = Calendar.getInstance();
-            current_time_hour = calendar_current.get(Calendar.HOUR_OF_DAY);
-            current_time_minute = calendar_current.get(Calendar.MINUTE);
+            current_time = new SimpleDateFormat("HH:mm").parse(currentTime);
+            calendar_current.setTime(current_time);
 
-            current_time = calendar_current.getTime();
-
-            Log.e("time", "current time:" + String.valueOf(current_time) + " |start time:" + String.valueOf(calendar_start.getTime()) + " |end time:" + String.valueOf(calendar_end.getTime()));
-
-            if (current_time_hour >= start_time_hour && current_time_hour <= end_time_hour) {
-                if (current_time_minute >= start_time_minute && current_time_minute <= end_time_minute)
-                    return true;
+            //
+            if (current_time.compareTo(end_time) < 0) {
+                calendar_current.add(Calendar.DATE, 1);
+                current_time = calendar_current.getTime();
             }
 
-        } catch (ParseException e) {
+            if (start_time.compareTo(end_time) < 0) {
+                calendar_start.add(Calendar.DATE, 1);
+                start_time = calendar_start.getTime();
+            }
+            //
+            if (current_time.before(start_time)) {
+
+                System.out.println(" Time is Lesser ");
+
+                return false;
+            } else {
+
+                if (current_time.after(end_time)) {
+                    calendar_end.add(Calendar.DATE, 1);
+                    end_time = calendar_end.getTime();
+                }
+
+                if (current_time.before(end_time)) {
+                    System.out.println("RESULT, true");
+                    return true;
+                } else {
+                    System.out.println("RESULT, false");
+                    return false;
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 }
+
+
+
+
+

@@ -1,61 +1,24 @@
 
 package com.example.practica.geotasks.weather;
 
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-
 public class Sys {
 
-    @SerializedName("type")
-    @Expose
-    private Integer type;
-    @SerializedName("id")
-    @Expose
-    private Integer id;
     @SerializedName("message")
     @Expose
     private Double message;
     @SerializedName("country")
     @Expose
     private String country;
-
-
-    /**
-     * 
-     * @return
-     *     The type
-     */
-    public Integer getType() {
-        return type;
-    }
-
-    /**
-     * 
-     * @param type
-     *     The type
-     */
-    public void setType(Integer type) {
-        this.type = type;
-    }
-
-    /**
-     * 
-     * @return
-     *     The id
-     */
-    public Integer getId() {
-        return id;
-    }
-
-    /**
-     * 
-     * @param id
-     *     The id
-     */
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @SerializedName("sunrise")
+    @Expose
+    private Integer sunrise;
+    @SerializedName("sunset")
+    @Expose
+    private Integer sunset;
 
     /**
      * 
@@ -93,5 +56,40 @@ public class Sys {
         this.country = country;
     }
 
+    /**
+     * 
+     * @return
+     *     The sunrise
+     */
+    public Integer getSunrise() {
+        return sunrise;
+    }
+
+    /**
+     * 
+     * @param sunrise
+     *     The sunrise
+     */
+    public void setSunrise(Integer sunrise) {
+        this.sunrise = sunrise;
+    }
+
+    /**
+     * 
+     * @return
+     *     The sunset
+     */
+    public Integer getSunset() {
+        return sunset;
+    }
+
+    /**
+     * 
+     * @param sunset
+     *     The sunset
+     */
+    public void setSunset(Integer sunset) {
+        this.sunset = sunset;
+    }
 
 }

@@ -8,28 +8,28 @@
     android:focusable="true">
 
     <ImageView
-        android:id="@+id/im_item_icon"
+        android:id="@+id/weather_icon"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_centerVertical="true"
         android:paddingLeft="16dp"
-        android:src="@drawable/cast_album_art_placeholder" />
+         />
 
     <TextView
         android:id="@+id/weather"
         android:layout_width="60dp"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginStart="15dp"
         android:layout_centerVertical="true"
-        android:layout_marginLeft="22dp"
-        android:layout_marginStart="22dp"
-        android:layout_toEndOf="@+id/im_item_icon"
-        android:layout_toRightOf="@+id/im_item_icon" />
+        android:layout_toRightOf="@+id/weather_icon"
+        android:layout_toEndOf="@+id/weather_icon" />
 
     <TextView
         android:id="@+id/task"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/im_item_icon"
+        android:layout_alignTop="@+id/weather_icon"
         android:layout_marginLeft="120dp"
 
         android:ellipsize="end"

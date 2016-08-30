@@ -1,9 +1,6 @@
 package com.example.practica.geotasks.activities;
 
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.content.Intent;;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -47,15 +44,13 @@ public class LogInActivity extends AppCompatActivity {
 
             @Override
             public void onError(FacebookException error) {
-                Toast.makeText(LogInActivity.this, "Something went wrong with Facebook: "+error, Toast.LENGTH_SHORT).show();
+                Toast.makeText(LogInActivity.this, "Something went wrong with Facebook: " + error, Toast.LENGTH_SHORT).show();
             }
         });
 
         if (AccessToken.getCurrentAccessToken() != null) {
             Intent intent = new Intent(LogInActivity.this, MainActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
-            
         }
 
     }
@@ -64,13 +59,6 @@ public class LogInActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         callbackManager.onActivityResult(requestCode, resultCode, data);
 
-    }
-
-    private boolean isNetworkAvailable() {
-        ConnectivityManager connectivityManager
-                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
 }

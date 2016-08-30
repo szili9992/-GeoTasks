@@ -3,12 +3,15 @@ package com.example.practica.geotasks.weather;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class WeatherInfo {
 
-
+    @SerializedName("coord")
+    @Expose
+    private Coord coord;
     @SerializedName("weather")
     @Expose
     private List<Weather> weather = new ArrayList<Weather>();
@@ -18,6 +21,12 @@ public class WeatherInfo {
     @SerializedName("main")
     @Expose
     private Main main;
+    @SerializedName("wind")
+    @Expose
+    private Wind wind;
+    @SerializedName("clouds")
+    @Expose
+    private Clouds clouds;
     @SerializedName("dt")
     @Expose
     private Integer dt;
@@ -34,6 +43,23 @@ public class WeatherInfo {
     @Expose
     private Integer cod;
 
+    /**
+     * 
+     * @return
+     *     The coord
+     */
+    public Coord getCoord() {
+        return coord;
+    }
+
+    /**
+     * 
+     * @param coord
+     *     The coord
+     */
+    public void setCoord(Coord coord) {
+        this.coord = coord;
+    }
 
     /**
      * 
@@ -87,6 +113,42 @@ public class WeatherInfo {
      */
     public void setMain(Main main) {
         this.main = main;
+    }
+
+    /**
+     * 
+     * @return
+     *     The wind
+     */
+    public Wind getWind() {
+        return wind;
+    }
+
+    /**
+     * 
+     * @param wind
+     *     The wind
+     */
+    public void setWind(Wind wind) {
+        this.wind = wind;
+    }
+
+    /**
+     * 
+     * @return
+     *     The clouds
+     */
+    public Clouds getClouds() {
+        return clouds;
+    }
+
+    /**
+     * 
+     * @param clouds
+     *     The clouds
+     */
+    public void setClouds(Clouds clouds) {
+        this.clouds = clouds;
     }
 
     /**

@@ -28,5 +28,8 @@
     <string name="until">Until:</string>
     <string name="destination">Destination:</string>
     <string name="done">Done</string>
+    <string name="units"> meters</string>
+    <string name="placeholder">Placeholder</string>
+    <string name="log_out_facebook">Log Out</string>
 
 </resources>

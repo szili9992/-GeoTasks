@@ -3,14 +3,12 @@ package com.example.practica.geotasks.activities;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -25,13 +23,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.example.practica.geotasks.utilities.GeofenceBuilder;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.utilities.RecyclerTouchListener;
 import com.example.practica.geotasks.models.Task;
 import com.example.practica.geotasks.data.TasksDataSource;
 import com.example.practica.geotasks.adapters.TaskAdapter;
+import com.example.practica.geotasks.weather.WeatherApi;
+import com.example.practica.geotasks.weather.WeatherInfo;
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
 import com.facebook.GraphRequest;
@@ -39,10 +41,17 @@ import com.facebook.GraphResponse;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.picasso.Picasso;
+
 import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
+
+import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -51,11 +60,15 @@ public class MainActivity extends AppCompatActivity
     private CircularImageView facebookProfilePicture;
     private TasksDataSource taskDataSource;
     private ArrayList<Task> taskList;
+    private ArrayList<WeatherInfo> weatherInfoList;
     private int taskId;
-    private String[] PERMISSIONS = {android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION};
     private TextView userEmail, userName;
-//    private GeofenceBuilder geofenceBuilder;
-//    private GoogleApiClient googleApiClient;
+    private GeofenceBuilder geofenceBuilder;
+    private GoogleApiClient googleApiClient;
+    private WeatherInfo weatherInfo;
+    private final String API_KEY = "8617b30a6fc114ad2ad929c111b76edf";
+    private final String UNITS = "metric";
+    private RecyclerView recyclerView;
 
 
     @Override
@@ -63,27 +76,47 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         FacebookSdk.sdkInitialize(getApplicationContext());
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
+        recyclerView = (RecyclerView) findViewById(R.id.my_recycler_view);
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         View hView = navigationView.inflateHeaderView(R.layout.nav_header_main);
+
         facebookProfilePicture = (CircularImageView) hView.findViewById(R.id.fb_profile_picture);
         userEmail = (TextView) hView.findViewById(R.id.user_email);
         userName = (TextView) hView.findViewById(R.id.user_name);
 
-//        geofenceBuilder=new GeofenceBuilder();
 
+        geofenceBuilder = new GeofenceBuilder();
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                    @Override
+                    public void onConnected(@Nullable Bundle bundle) {
+                        Log.d("Connection success", "main activity apiclient");
+                    }
 
-        if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, 1);
-        }
+                    @Override
+                    public void onConnectionSuspended(int i) {
+                        Log.d("Connection suspended", "2");
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                        Log.d("Connection failed", connectionResult.getErrorMessage());
+                    }
+                })
+                .build();
+        googleApiClient.connect();
 
 
         taskDataSource = new TasksDataSource(this);
         taskDataSource.open();
         taskList = taskDataSource.getAllTasks();
+        weatherInfoList = new ArrayList<>();
 
 
         if (checkForConnection()) {
+            new getWeatherDataAsync().execute();
             new FacebookAsyncTask().execute();
         }
 
@@ -91,7 +124,8 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        taskAdapter = new TaskAdapter(taskList);
+
+        taskAdapter = new TaskAdapter(taskList, weatherInfoList);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -122,6 +156,7 @@ public class MainActivity extends AppCompatActivity
 
 
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setItemIconTintList(null);
     }
 
     @Override
@@ -163,8 +198,19 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
-            // Handle the camera action
+            for (int i = 0; i < taskList.size(); i++) {
+                try {
+                    geofenceBuilder.stopGeofenceMonitoring(googleApiClient, taskList.get(i).getTaskName());
+                } catch (Exception e) {
+                    Log.d("not active", "Geofence not active");
+                }
+            }
         } else if (id == R.id.nav_gallery) {
+            try {
+                geofenceBuilder.stopLocationUpdates(googleApiClient, this);
+            } catch (Exception e) {
+                Log.d("not active", "Location monitoring not active");
+            }
 
         } else if (id == R.id.nav_slideshow) {
 
@@ -181,6 +227,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    /**
+     * End facebook session.
+     *
+     * @param item
+     */
     public void logOutFb(MenuItem item) {
         LoginManager.getInstance().logOut();
         Intent intent = new Intent(MainActivity.this, LogInActivity.class);
@@ -207,29 +258,21 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
-//        googleApiClient.reconnect();
+        googleApiClient.reconnect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        googleApiClient.disconnect();
+        googleApiClient.disconnect();
     }
 
     /**
-     * Request user data from Facebook. Result is a JSON object that is stored in fbJsonData String which is then passed to setUserProfile();
+     * On recyclerview item long press issue a dialog to ask for task and geofence deletion.
+     *
+     * @param position
      */
-//
-//
-//    /**
-//     * Display current user data using the JSON object from getUserInfo()
-//     *
-//     * @param jsonData
-//     */
-//
-
-
-    public void alertDialogShow(final int position) {
+    private void alertDialogShow(final int position) {
 
         MaterialDialog.Builder builder = new MaterialDialog.Builder(MainActivity.this)
                 .content(R.string.alert_dialog_content)
@@ -241,6 +284,12 @@ public class MainActivity extends AppCompatActivity
                         Task task = getSelectedTask(position, taskList);
                         taskAdapter.remove(task);
                         taskDataSource.deleteTask(task);
+                        try {
+                            geofenceBuilder.stopGeofenceMonitoring(googleApiClient, task.getTaskName());
+                        } catch (Exception e) {
+                            Log.e("Not active", "Geofence not active");
+                        }
+
                     }
                 })
                 .onNegative(new MaterialDialog.SingleButtonCallback() {
@@ -254,7 +303,14 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    public Task getSelectedTask(int taskId, ArrayList<Task> tasks) {
+    /**
+     * Compare the task selected from the recylerview with the ones stored in the database.
+     *
+     * @param taskId
+     * @param tasks
+     * @return
+     */
+    private Task getSelectedTask(int taskId, ArrayList<Task> tasks) {
         for (int i = 0; i < tasks.size(); i++) {
             if (taskId == tasks.get(i).get_id()) {
                 return tasks.get(i);
@@ -263,19 +319,11 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
-
-    public static boolean hasPermissions(Context context, String[] permissions) {
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-
+    /**
+     * Check if there's and active internet connection.
+     *
+     * @return
+     */
     private boolean checkForConnection() {
         ConnectivityManager cm =
                 (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -286,13 +334,16 @@ public class MainActivity extends AppCompatActivity
                 activeNetwork.isConnectedOrConnecting();
     }
 
-    private class FacebookAsyncTask extends AsyncTask<Void,Void,Void>{
-        String fbJsonData;
-        ProgressDialog dialog;
+    /**
+     * Async task to get facebook data and display it in nav header.
+     */
+    private class FacebookAsyncTask extends AsyncTask<Void, Void, Void> {
+        private String fbJsonData;
+        private ProgressDialog dialog;
 
         @Override
         protected void onPreExecute() {
-            dialog=ProgressDialog.show(MainActivity.this,"Loading...","Getting Facebook data.");
+            dialog = ProgressDialog.show(MainActivity.this, "Loading...", "Getting Facebook data.");
         }
 
         @Override
@@ -301,7 +352,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCompleted(JSONObject json_object, GraphResponse response) {
                     fbJsonData = json_object.toString();
-                    Log.e("Succes","itt vagyok");
+                    Log.e("Succes", "itt vagyok");
                 }
             });
             Bundle permission_param = new Bundle();
@@ -326,5 +377,45 @@ public class MainActivity extends AppCompatActivity
             }
             dialog.dismiss();
         }
+    }
+
+    /**
+     * Get weather data with async task.
+     */
+    private class getWeatherDataAsync extends AsyncTask<Void, Void, Void> {
+
+
+        private ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = ProgressDialog.show(MainActivity.this, "Loading...", "Getting weather");
+        }
+
+        @Override
+        protected Void doInBackground(Void... vHolders) {
+            for (int i = 0; i < taskList.size(); i++) {
+                try {
+                    WeatherApi weatherApi = WeatherApi.retrofit.create(WeatherApi.class);
+                    Call<WeatherInfo> call = weatherApi.getWeatherData(taskList.get(i).getDestinationLatitude(), taskList.get(i).getDestinationLongitude(), API_KEY, UNITS);
+                    weatherInfo = call.execute().body();
+                    weatherInfoList.add(weatherInfo);
+                    Log.e("size of weatherinfolist", weatherInfoList.get(i).getCoord().getLat().toString());
+                } catch (IOException e) {
+                    Log.e("get weather coordinates", "something went wrong: " + e.getMessage());
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            taskAdapter.notifyDataSetChanged();
+            progressDialog.dismiss();
+
+        }
+
     }
 }
