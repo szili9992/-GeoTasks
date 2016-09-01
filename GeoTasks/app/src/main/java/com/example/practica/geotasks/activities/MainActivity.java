@@ -23,9 +23,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.example.practica.geotasks.service.LocationService;
 import com.example.practica.geotasks.utilities.GeofenceBuilder;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.utilities.RecyclerTouchListener;
@@ -197,7 +199,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.stop_geofence_monitoring) {
             for (int i = 0; i < taskList.size(); i++) {
                 try {
                     geofenceBuilder.stopGeofenceMonitoring(googleApiClient, taskList.get(i).getTaskName());
@@ -205,14 +207,23 @@ public class MainActivity extends AppCompatActivity
                     Log.d("not active", "Geofence not active");
                 }
             }
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.stop_location_monitoring_service) {
             try {
-                geofenceBuilder.stopLocationUpdates(googleApiClient, this);
+                stopService(new Intent(this, LocationService.class));
             } catch (Exception e) {
                 Log.d("not active", "Location monitoring not active");
             }
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.resume_geofence_monitoring) {
+            for (int i = 0; i < taskList.size(); i++) {
+                try {
+                    geofenceBuilder.startGeofenceMonitoring(this, googleApiClient, taskList.get(i).getTaskName(),
+                            taskList.get(i).getDestinationLatitude(), taskList.get(i).getDestinationLongitude(), taskList.get(i).getGeofenceRadius());
+                    Toast.makeText(this, "Succesfully started and restored Geofences!", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Log.e("reesume geofence mon", "Can't start geofence on boot: " + e.getMessage());
+                }
+            }
 
         } else if (id == R.id.nav_manage) {
 
@@ -265,6 +276,7 @@ public class MainActivity extends AppCompatActivity
     protected void onStop() {
         super.onStop();
         googleApiClient.disconnect();
+
     }
 
     /**

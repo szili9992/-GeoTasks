@@ -3,19 +3,19 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_camera"
-            android:icon="@drawable/ic_menu_camera"
+            android:id="@+id/stop_geofence_monitoring"
+            android:icon="@drawable/ic_action_monitor"
             android:title="Stop Geofence monitoring"
             />
         <item
-            android:id="@+id/nav_gallery"
-            android:icon="@drawable/ic_menu_gallery"
-            android:title="Stop location monitoring"
+            android:id="@+id/stop_location_monitoring_service"
+            android:icon="@drawable/ic_location_off"
+            android:title="Stop location monitoring service"
             />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="@string/placeholder"
+            android:id="@+id/resume_geofence_monitoring"
+            android:icon="@drawable/ic_settings_backup_restore"
+            android:title="Resume Geofence monitoring"
             />
         <item
             android:id="@+id/nav_manage"

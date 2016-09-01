@@ -100,4 +100,10 @@ public class OnBootStartService extends Service {
             }
         }
     }
+
+    @Override
+    public void onDestroy() {
+        geofenceBuilder.stopLocationUpdates(googleApiClient,context);
+        super.onDestroy();
+    }
 }

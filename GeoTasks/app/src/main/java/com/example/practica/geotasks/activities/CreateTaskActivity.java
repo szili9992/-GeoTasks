@@ -1,5 +1,6 @@
 package com.example.practica.geotasks.activities;
 
+import android.app.ActivityManager;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.example.practica.geotasks.service.LocationService;
 import com.example.practica.geotasks.utilities.GeofenceBuilder;
 import com.example.practica.geotasks.R;
 import com.example.practica.geotasks.models.Task;
@@ -182,10 +184,14 @@ public class CreateTaskActivity extends AppCompatActivity {
             taskDataSource.creatTask(createTask);
             if (place.getLatLng() != null) {
                 geofenceBuilder.startGeofenceMonitoring(this, googleApiClient, taskName.getText().toString(), createTaskLatitude, createTaskLongitude, createTaskSeekBarValue);
-                geofenceBuilder.startLocationMonitoring(googleApiClient);
+                //geofenceBuilder.startLocationMonitoring(googleApiClient);
             }
         }
         Log.e("Task", "Created/updated: " + createTask);
+
+        if (!isServiceRunning()) {
+            startService(new Intent(this, LocationService.class));
+        }
         startActivity(addTaskIntent);
     }
 
@@ -362,5 +368,14 @@ public class CreateTaskActivity extends AppCompatActivity {
         }
     }
 
+    private boolean isServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if ("com.example.practica.geotasks.service.LocationService".equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }

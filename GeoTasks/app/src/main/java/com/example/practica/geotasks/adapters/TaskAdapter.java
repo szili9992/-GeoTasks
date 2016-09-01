@@ -2,6 +2,7 @@ package com.example.practica.geotasks.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -82,8 +83,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.ViewHolder> {
             holder.currentWeather.setText(String.valueOf(weatherInfo.getMain().getTemp()) + "\u2103");
             getWeatherIcon(holder);
 
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (IndexOutOfBoundsException e) {
+            Log.d("out of bound","out of bound");
             holder.currentWeather.setText("N/A");
             Picasso.with(context).load(base + "/weather-none-available").into(holder.weatherImg);
         }

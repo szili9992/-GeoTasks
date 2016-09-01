@@ -30,9 +30,9 @@ public class GeofenceBuilder {
     public void startLocationMonitoring(GoogleApiClient googleApiClient) {
         try {
             LocationRequest locationRequest = LocationRequest.create()
-                    .setInterval(180000)
+                    .setInterval(60000)
                     .setFastestInterval(5000)
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    .setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
             LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, new LocationListener() {
                 @Override
