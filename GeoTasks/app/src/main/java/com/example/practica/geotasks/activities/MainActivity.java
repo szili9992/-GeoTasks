@@ -117,6 +117,9 @@ public class MainActivity extends AppCompatActivity
         weatherInfoList = new ArrayList<>();
 
 
+        if(taskList==null){
+            stopService(new Intent(this, LocationService.class));
+        }
         if (checkForConnection()) {
             new getWeatherDataAsync().execute();
             new FacebookAsyncTask().execute();
@@ -210,6 +213,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.stop_location_monitoring_service) {
             try {
                 stopService(new Intent(this, LocationService.class));
+                Log.d("loc monitor","location monitoring has stopped");
             } catch (Exception e) {
                 Log.d("not active", "Location monitoring not active");
             }
@@ -412,7 +416,7 @@ public class MainActivity extends AppCompatActivity
                     Call<WeatherInfo> call = weatherApi.getWeatherData(taskList.get(i).getDestinationLatitude(), taskList.get(i).getDestinationLongitude(), API_KEY, UNITS);
                     weatherInfo = call.execute().body();
                     weatherInfoList.add(weatherInfo);
-                    Log.e("size of weatherinfolist", weatherInfoList.get(i).getCoord().getLat().toString());
+                    //Log.e("size of weatherinfolist", weatherInfoList.get(i).getCoord().getLat().toString());
                 } catch (IOException e) {
                     Log.e("get weather coordinates", "something went wrong: " + e.getMessage());
                 }

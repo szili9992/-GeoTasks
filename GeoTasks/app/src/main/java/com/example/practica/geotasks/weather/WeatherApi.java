@@ -11,7 +11,7 @@ import retrofit2.http.Query;
  */
 public interface WeatherApi {
     //http://api.openweathermap.org/data/2.5/weather?lat=35&lon=139&appid=8617b30a6fc114ad2ad929c111b76edf
-    @GET("/data/2.5/weather")
+    @GET("/data/2.5/weather?")
     Call<WeatherInfo> getWeatherData(@Query("lat") double lat, @Query("lon") double lon, @Query("appid") String appid, @Query("units") String units);
 
     Retrofit retrofit = new Retrofit.Builder()

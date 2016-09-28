@@ -2,26 +2,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/stop_geofence_monitoring"
-            android:icon="@drawable/ic_action_monitor"
-            android:title="Stop Geofence monitoring"
-            />
-        <item
-            android:id="@+id/stop_location_monitoring_service"
-            android:icon="@drawable/ic_location_off"
-            android:title="Stop location monitoring service"
-            />
-        <item
-            android:id="@+id/resume_geofence_monitoring"
-            android:icon="@drawable/ic_settings_backup_restore"
-            android:title="Resume Geofence monitoring"
-            />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/ic_menu_manage"
-            android:title="@string/placeholder"
-            />
+        <item android:title="Kill switches">
+            <menu>
+                <item
+                    android:id="@+id/stop_geofence_monitoring"
+                    android:icon="@drawable/ic_action_monitor"
+                    android:title="Stop Geofence monitoring" />
+                <item
+                    android:id="@+id/stop_location_monitoring_service"
+                    android:icon="@drawable/ic_location_off"
+                    android:title="Stop location monitoring service" />
+                <item
+                    android:id="@+id/resume_geofence_monitoring"
+                    android:icon="@drawable/ic_settings_backup_restore"
+                    android:title="Resume Geofence monitoring" />
+                <item
+                    android:id="@+id/nav_manage"
+                    android:icon="@drawable/ic_menu_manage"
+                    android:title="@string/placeholder" />
+            </menu>
+        </item>
     </group>
 
     <item android:title="Communicate">
@@ -29,13 +29,12 @@
             <item
                 android:id="@+id/nav_share"
                 android:icon="@drawable/ic_menu_share"
-                android:title="@string/placeholder"
-                />
+                android:title="@string/placeholder" />
             <item
                 android:id="@+id/nav_send"
                 android:icon="@drawable/com_facebook_button_icon_blue"
-                android:title="@string/log_out_facebook"
-                android:onClick="logOutFb"/>
+                android:onClick="logOutFb"
+                android:title="@string/log_out_facebook" />
         </menu>
     </item>
 
